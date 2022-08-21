@@ -8,7 +8,8 @@ global using CrossForms.Native.Stub;
 
 #elif IS_OSX_X64
 #define MACOS
-global using CrossForms.Native.Stub;
+global using CrossForms.Native.MacOS;
+using System.Runtime.InteropServices;
 
 #else
 global using CrossForms.Native.Stub;
@@ -16,34 +17,73 @@ global using CrossForms.Native.Stub;
 
 using CrossForms;
 using CrossForms.Native;
+using CrossForms.Native.Common;
 
 try {
-	NativeApplication.Start();
-	Application.mainWindow = new Form("MainWindow", "Тестовое окно");
+	ObjC.InitRuntime();
 
-	var testBtn1 = new Button("Hello!") {
-		x = 10,
-		y = 10,
-		width = 200
-	};
-	testBtn1.OnClick += (sender, e) => {
-		Console.WriteLine($"Button 1 click at ({e.x}; {e.y})");
-	};
-	Application.mainWindow.Append(testBtn1);
+	var app = new NSApplication();
+    app.SetActivationPolicy(NSApplication.ActivationPolicy.Regular);
 
-	var testBtn2 = new Button("Ещё кнопка") {
-		x = 10,
-		y = 35,
-		width = 100
-	};
-	testBtn2.OnClick += (sender, e) => {
-		Console.WriteLine($"Button 2 click at ({e.x}; {e.y})");
-	};
-	Application.mainWindow.Append(testBtn2);
+	var mainWindow = new NSWindow(
+		new CGRect(0, 0, 400, 300),
+		NSWindow.StyleMask.Titled | NSWindow.StyleMask.Closable | NSWindow.StyleMask.Resizable,
+		2
+	);
 
-	Application.mainWindow.Show();
+	mainWindow.title = "CrossForms App";
 
-	Application.Run();
+	var btn = new NSButton("Test button");
+	btn.OnClick(() => {
+		Console.WriteLine("CLICK!!!");
+	});
+	btn.SetFrameOrigin(0, 0);
+	mainWindow.Append(btn);
+
+
+	var btn2 = new NSButton("Test button 2");
+	btn2.OnClick(() => {
+		Console.WriteLine("CLICK 2!!!");
+	});
+	btn2.SetFrameOrigin(0, 100);
+	mainWindow.Append(btn2);
+
+	app.Run();
+
+	// var NSApplication = new ObjClass();
+	// var result = ObjC.InitApp();
+	// if (result.success) Console.WriteLine($"Ok({result.value})");
+	// else Console.WriteLine($"Err({result.error})");
+	// result.Dispose();
+
+	// var NSApplication = ObjC.GetClass("NSApplication");
+	// Console.WriteLine(NSApplication);
+	// NativeApplication.Start();
+	// Application.mainWindow = new Form("MainWindow", "Тестовое окно");
+
+	// var testBtn1 = new Button("Hello!") {
+	// 	x = 10,
+	// 	y = 10,
+	// 	width = 200
+	// };
+	// testBtn1.OnClick += (sender, e) => {
+	// 	Console.WriteLine($"Button 1 click at ({e.x}; {e.y})");
+	// };
+	// Application.mainWindow.Append(testBtn1);
+
+	// var testBtn2 = new Button("Ещё кнопка") {
+	// 	x = 10,
+	// 	y = 35,
+	// 	width = 100
+	// };
+	// testBtn2.OnClick += (sender, e) => {
+	// 	Console.WriteLine($"Button 2 click at ({e.x}; {e.y})");
+	// };
+	// Application.mainWindow.Append(testBtn2);
+
+	// Application.mainWindow.Show();
+
+	// Application.Run();
 } catch (NativeException err) {
 	Console.Error.WriteLine(err.ToString());
 }

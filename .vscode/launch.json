@@ -13,6 +13,7 @@
 			"program": "${workspaceFolder}/bin/Debug/net6.0/CrossForms.dll",
 			"args": [],
 			"cwd": "${workspaceFolder}",
+			"justMyCode": false,
 			// For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
 			"console": "internalConsole",
 			"stopAtEntry": false

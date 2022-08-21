@@ -59,6 +59,8 @@ public class NativeForm: Control, IForm {
 	protected override void UnLoad () {
 		windowClass.UnRegister();
 
-		if (this == Application.mainWindow) PostQuitMessage(0);
+		if (Application.mainWindow != null) {
+			if ((IForm) this == Application.mainWindow) PostQuitMessage(0);
+		}
 	}
 }

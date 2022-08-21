@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PublishTrimmed>true</PublishTrimmed>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <DefineConstants>IS_$(NETCoreSdkRuntimeIdentifier.Replace('-', '_').ToUpper())</DefineConstants>
     <ApplicationManifest>app.manifest</ApplicationManifest>
