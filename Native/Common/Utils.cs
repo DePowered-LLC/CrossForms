@@ -40,6 +40,20 @@ public abstract class NativeManaged<N> where N: struct {
 	public N inner;
 }
 
+public class Cell<N> where N: struct {
+	protected IntPtr ptr;
+	public N value;
+	public Cell (IntPtr ptr) {
+		this.ptr = ptr;
+		value = Marshal.PtrToStructure<N>(ptr);
+	}
+
+	~Cell () {
+		Marshal.DestroyStructure<N>(ptr);
+		Marshal.FreeHGlobal(ptr);
+	}
+}
+
 public class NativeUtils {
 	public static T[] ReadArray<N, T> (int count, Action<IntPtr> consume)
 	where N: struct where T: NativeManaged<N>, new() {

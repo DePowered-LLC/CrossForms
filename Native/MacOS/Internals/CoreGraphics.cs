@@ -25,5 +25,5 @@ public struct CGPoint {
 
 [StructLayout(LayoutKind.Sequential)]
 public struct CGSize {
-	public double height, width;
+	public double width, height;
 }

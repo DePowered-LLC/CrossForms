@@ -4,20 +4,20 @@ using CrossForms.Native.Common;
 
 namespace CrossForms.Native.MacOS;
 
-public class ObjClass: NativeManaged<IntPtr> {
-	private delegate IntPtr GetClassNameFn (IntPtr handle);
-	private static readonly GetClassNameFn GetName;
-	public string Name => Marshal.PtrToStringAnsi(GetName(inner));
+internal class ObjClass: NativeManaged<IntPtr> {
+	[DllImport(ObjC.COCOA, EntryPoint = "class_getName", CharSet = CharSet.Ansi)]
+	private static extern string GetName (IntPtr handle);
+	public string Name => GetName(inner);
 
-	private delegate int GetClassListFn (IntPtr buffer, int count);
-	private static readonly GetClassListFn GetClassList;
+	[DllImport(ObjC.COCOA, EntryPoint = "objc_getClassList")]
+	private static extern int GetClassList (IntPtr buffer, int count);
 	public static ObjClass[] GetRegistered () {
 		var count = GetClassList(IntPtr.Zero, 0);
 		return NativeUtils.ReadArray<IntPtr, ObjClass>(count, buffer => GetClassList(buffer, count));
 	}
 
-	private delegate IntPtr GetClassFn (string name);
-	private static readonly GetClassFn GetClass;
+	[DllImport(ObjC.COCOA, EntryPoint = "objc_getClass", CharSet = CharSet.Ansi)]
+	private static extern IntPtr GetClass (string name);
 	public static ObjClass? TryGet (string name) {
 		var handle = GetClass(name);
 
@@ -31,24 +31,19 @@ public class ObjClass: NativeManaged<IntPtr> {
 	}
 
 
-	public IntPtr CallRaw (string selector) => ObjC.SendMessage(inner, selector);
-	public IntPtr CallRaw (string selector, params NativeArg[] args) => ObjC.SendMessage(inner, selector, args);
-	public IntPtr CallRaw (IntPtr selector, params NativeArg[] args) => ObjC.SendMessage(inner, selector, args);
-
-
-	private static readonly IntPtr ALLOC_SEL;
+	private static readonly IntPtr ALLOC_SEL = ObjSelector.Get("alloc");
 	public void Construct (NativeManaged<IntPtr> obj) {
-		obj.inner = CallRaw(ALLOC_SEL);
+		obj.inner = ObjC.SendMessage(inner, ALLOC_SEL);
+	}
+	public void Construct (NativeManaged<IntPtr> obj, IntPtr constructorSel) {
+		obj.inner = ObjC.SendMessage(inner, constructorSel);
 	}
 
-	public void Construct (NativeManaged<IntPtr> obj, string selector, params NativeArg[] args) {
-		obj.inner = CallRaw(selector, args);
-	}
+	[DllImport(ObjC.COCOA, EntryPoint = "objc_allocateClassPair", CharSet = CharSet.Ansi)]
+	private static extern IntPtr AllocateClassPair (IntPtr superClass, string name, nuint extraBytes);
 
-	private delegate IntPtr AllocateClassPairFn (IntPtr superClass, string name, nuint extraBytes);
-	private static readonly AllocateClassPairFn AllocateClassPair;
-	private delegate void RegisterClassPairFn (IntPtr cls);
-	private static readonly RegisterClassPairFn RegisterClassPair;
+	[DllImport(ObjC.COCOA, EntryPoint = "objc_registerClassPair")]
+	private static extern void RegisterClassPair (IntPtr cls);
 
 	public ObjClass NewSubClass (string name, Action<ObjClass> fillClass) => NewSubClass(inner, name, fillClass);
 	public static ObjClass NewSubClass (IntPtr inner, string name, Action<ObjClass> fillClass) {
@@ -65,14 +60,15 @@ public class ObjClass: NativeManaged<IntPtr> {
 		return cls;
 	}
 
-	private delegate bool IsMetaClassFn (IntPtr cls);
-	private static readonly IsMetaClassFn IsMetaClass;
+	[DllImport(ObjC.COCOA, EntryPoint = "class_isMetaClass")]
+	private static extern bool IsMetaClass (IntPtr cls);
 	public bool isMeta => IsMetaClass(inner);
 
-	private delegate IntPtr GetMethodNameFn (IntPtr method);
-	private static readonly GetMethodNameFn GetMethodName;
-	private unsafe delegate IntPtr* CopyMethodListFn (IntPtr cls, ref uint count);
-	private static readonly CopyMethodListFn CopyMethodList;
+	[DllImport(ObjC.COCOA, EntryPoint = "method_getName", CharSet = CharSet.Ansi)]
+	private static extern string GetMethodName (IntPtr method);
+
+	[DllImport(ObjC.COCOA, EntryPoint = "class_copyMethodList")]
+	private static extern unsafe IntPtr* CopyMethodList (IntPtr cls, ref uint count);
 	public string[] GetMethods () {
 		unsafe {
 			uint count = 0;
@@ -80,7 +76,7 @@ public class ObjClass: NativeManaged<IntPtr> {
 
 			var result = new string[count];
 			for (uint i = 0; i < count; i++) {
-				result[i] = Marshal.PtrToStringAnsi(GetMethodName(list[i]));
+				result[i] = GetMethodName(list[i]);
 			}
 
 			Marshal.FreeHGlobal((IntPtr) list);
@@ -89,8 +85,8 @@ public class ObjClass: NativeManaged<IntPtr> {
 	}
 
 
-	private delegate bool AddClassMethodFn (IntPtr cls, IntPtr nameSel, IntPtr impl, string types);
-	private static readonly AddClassMethodFn AddClassMethod;
+	[DllImport(ObjC.COCOA, EntryPoint = "class_addMethod", CharSet = CharSet.Ansi)]
+	private static extern bool AddClassMethod (IntPtr cls, IntPtr nameSel, IntPtr impl, string types);
 	public IntPtr AddMethod<D> (string name, Delegate fn) where D: Delegate {
 		var fnType = typeof(D).GetMethod("Invoke");
 		var types = new StringBuilder();
@@ -111,18 +107,11 @@ public class ObjClass: NativeManaged<IntPtr> {
 		return sel;
 	}
 
-
-	static ObjClass () {
-		ALLOC_SEL = ObjSelector.Get("alloc");
-
-		GetName = ObjC.GetFunction<GetClassNameFn>("class_getName");
-		GetClassList = ObjC.GetFunction<GetClassListFn>("objc_getClassList");
-		AllocateClassPair = ObjC.GetFunction<AllocateClassPairFn>("objc_allocateClassPair");
-		RegisterClassPair = ObjC.GetFunction<RegisterClassPairFn>("objc_registerClassPair");
-		AddClassMethod = ObjC.GetFunction<AddClassMethodFn>("class_addMethod");
-		IsMetaClass = ObjC.GetFunction<IsMetaClassFn>("class_isMetaClass");
-		CopyMethodList = ObjC.GetFunction<CopyMethodListFn>("class_copyMethodList");
-		GetMethodName = ObjC.GetFunction<GetMethodNameFn>("method_getName");
-		GetClass = ObjC.GetFunction<GetClassFn>("objc_getClass");
+	[DllImport(ObjC.COCOA, EntryPoint = "class_replaceMethod", CharSet = CharSet.Ansi)]
+	private static extern bool ReplaceClassMethod (IntPtr cls, IntPtr nameSel, IntPtr impl, string types);
+	public IntPtr ReplaceMethod (string name, Delegate fn, string types) {
+		var sel = ObjSelector.Register(name);
+		ReplaceClassMethod(inner, sel, Marshal.GetFunctionPointerForDelegate(fn), types);
+		return sel;
 	}
 }

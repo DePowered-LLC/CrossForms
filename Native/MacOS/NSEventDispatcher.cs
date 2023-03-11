@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using CrossForms.Native.Common;
 
 namespace CrossForms.Native.MacOS;
@@ -10,7 +11,7 @@ public struct EventHandlers {
 public class NSEventDispatcher: NSNested {
 	private ObjClass _dispatcherClass;
 	public IntPtr dispatcherInstance;
-	protected ObjClass dispatcherClass {
+	private ObjClass dispatcherClass {
 		get {
 			if (_dispatcherClass == null) {
 				_dispatcherClass = NSObject.proto.NewSubClass(GetType().Name + "_ED");
@@ -43,7 +44,9 @@ public class NSEventDispatcher: NSNested {
 
 	public delegate void DispatchEventFn (IntPtr self, IntPtr sel, IntPtr source);
 	public void DispatchEvent (IntPtr _self, IntPtr sel, IntPtr source) {
-		var name = ObjSelector.GetName(sel);
+		var namePtr = ObjSelector.GetName(sel);
+		var name = Marshal.PtrToStringAnsi(namePtr);
+
 		if (events.TryGetValue(name, out EventHandlers handlers)) {
 			if (handlers.map.TryGetValue(source, out Action handle)) {
 				handle();

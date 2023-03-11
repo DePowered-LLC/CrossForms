@@ -20,8 +20,6 @@ using CrossForms.Native;
 using CrossForms.Native.Common;
 
 try {
-	ObjC.InitRuntime();
-
 	var app = new NSApplication();
     app.SetActivationPolicy(NSApplication.ActivationPolicy.Regular);
 
@@ -37,16 +35,21 @@ try {
 	btn.OnClick(() => {
 		Console.WriteLine("CLICK!!!");
 	});
-	btn.SetFrameOrigin(0, 0);
+	btn.SetFrameOrigin(0, 300 - 0 - btn.Frame.size.height);
 	mainWindow.Append(btn);
 
 
 	var btn2 = new NSButton("Test button 2");
 	btn2.OnClick(() => {
+		var origin = btn.Frame.origin;
+		origin.y += 1;
+		btn.SetFrameOrigin(origin);
 		Console.WriteLine("CLICK 2!!!");
 	});
-	btn2.SetFrameOrigin(0, 100);
+	btn2.SetFrameOrigin(0, 300 - 22 - btn2.Frame.size.height);
 	mainWindow.Append(btn2);
+
+	mainWindow.OnClose(() => Console.WriteLine("main window closed"));
 
 	app.Run();
 

@@ -4,53 +4,29 @@ using CrossForms.Native.Common;
 namespace CrossForms.Native.MacOS;
 
 internal partial class ObjC {
-	// TODO: подумать о надобности этого хука, т.к. static { ... } выполняется в правильно порядке, если вызывать InitRuntime сразу
-	private static Action? onRuntimeReady = () => {};
-	public static void RuntimeReady (Action callback) {
-		if (onRuntimeReady == null) callback();
-		else onRuntimeReady += callback;
-	}
+	public const string COCOA = "/System/Library/Frameworks/Cocoa.framework/Cocoa";
 
-	[DllImport("objc_helper.dylib", EntryPoint = "initRuntime")]
-	private static extern IntPtr _InitRuntime ();
-	public static void InitRuntime () {
-		if (onRuntimeReady == null) return;
+	[DllImport(COCOA, EntryPoint = "objc_msgSend")]
+	public static extern IntPtr SendMessage (IntPtr cls, IntPtr selector);
 
-		var result = new NativeStatus(_InitRuntime());
-		if (!result.success) throw new Exception(result.error);
+	[DllImport(COCOA, EntryPoint = "objc_msgSend", CharSet = CharSet.Ansi)]
+	public static extern IntPtr SendMessage (IntPtr cls, IntPtr selector, string arg1);
 
-		onRuntimeReady();
-		onRuntimeReady = null;
+	[DllImport(COCOA, EntryPoint = "objc_msgSend")]
+	public static extern IntPtr SendMessage (IntPtr cls, IntPtr selector, IntPtr arg1);
 
-		msgSendPtr = GetFunction("objc_msgSend");
-		SendMessageStatic = GetFunction<MsgSendFn>("objc_msgSend");
-	}
-
-	[DllImport("objc_helper.dylib", EntryPoint = "getFunction", CharSet = CharSet.Ansi)]
-	public static extern IntPtr GetFunction (string symbol);
-	public static T GetFunction<T> (string symbol) => Marshal.GetDelegateForFunctionPointer<T>(GetFunction(symbol));
-
-
-	private static IntPtr msgSendPtr;
-	private static Type[] msgSendTypes = new Type[] { typeof(IntPtr), typeof(IntPtr) };
-
-	public static IntPtr SendMessage (IntPtr receiver, IntPtr selector, params NativeArg[] args) {
-		var types = new List<Type>(msgSendTypes);
-		return NativeFn.Apply<IntPtr>(msgSendPtr, types, new List<object> { receiver, selector }, args);
-	}
-
-	public static IntPtr SendMessage (IntPtr receiver, string selector, params NativeArg[] args) {
-		return SendMessage(receiver, ObjSelector.Get(selector), args);
-	}
-
-	private delegate IntPtr MsgSendFn (IntPtr cls, IntPtr selector);
-	private static MsgSendFn SendMessageStatic;
+	[DllImport(COCOA, EntryPoint = "objc_msgSend")]
+	public static extern IntPtr SendMessage (IntPtr cls, IntPtr selector, int arg1);
 
 	public static IntPtr SendMessage (IntPtr receiver, string selector) {
-		return SendMessageStatic(receiver, ObjSelector.Get(selector));
+		return SendMessage(receiver, ObjSelector.Get(selector));
 	}
 
-	public static IntPtr SendMessage (IntPtr receiver, IntPtr selector) {
-		return SendMessageStatic(receiver, selector);
+	[DllImport(COCOA, EntryPoint = "objc_msgSend_stret")]
+	private static extern void SendMessageStruct (IntPtr returnPtr, IntPtr cls, IntPtr selector);
+	public static Cell<T> SendMessage<T> (IntPtr receiver, IntPtr selector) where T: struct {
+		var returnPtr = Marshal.AllocHGlobal(Marshal.SizeOf<T>());
+		SendMessageStruct(returnPtr, receiver, selector);
+		return new Cell<T>(returnPtr);
 	}
 }
