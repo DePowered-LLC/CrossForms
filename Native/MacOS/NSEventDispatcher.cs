@@ -11,12 +11,11 @@ public struct EventHandlers {
 public class NSEventDispatcher: NSNested {
 	private ObjClass _dispatcherClass;
 	public IntPtr dispatcherInstance;
-	private ObjClass dispatcherClass {
+	internal ObjClass dispatcherClass {
 		get {
 			if (_dispatcherClass == null) {
 				_dispatcherClass = NSObject.proto.NewSubClass(GetType().Name + "_ED");
 				dispatcherInstance = ObjC.SendMessage(_dispatcherClass.inner, "alloc");
-				ObjC.SendMessage(dispatcherInstance, "init");
 			}
 
 			return _dispatcherClass;
@@ -43,9 +42,14 @@ public class NSEventDispatcher: NSNested {
 	}
 
 	public delegate void DispatchEventFn (IntPtr self, IntPtr sel, IntPtr source);
-	public void DispatchEvent (IntPtr _self, IntPtr sel, IntPtr source) {
-		var namePtr = ObjSelector.GetName(sel);
-		var name = Marshal.PtrToStringAnsi(namePtr);
+	public void DispatchEvent (IntPtr _self, IntPtr selector, IntPtr source) {
+		var name = Marshal.PtrToStringAnsi(ObjSelector.GetName(selector));
+
+		var isNotification = NSNotification.proto.IsInstance(source);
+		if (isNotification) {
+			var notification = new NSNotification { inner = source };
+			source = notification.Object;
+		}
 
 		if (events.TryGetValue(name, out EventHandlers handlers)) {
 			if (handlers.map.TryGetValue(source, out Action handle)) {

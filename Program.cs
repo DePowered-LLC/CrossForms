@@ -49,7 +49,12 @@ try {
 	btn2.SetFrameOrigin(0, 300 - 22 - btn2.Frame.size.height);
 	mainWindow.Append(btn2);
 
-	mainWindow.OnClose(() => Console.WriteLine("main window closed"));
+	mainWindow.OnClose(() => {
+		if (!app.isRunning) return;
+
+		Console.WriteLine("main window closed");
+		app.Terminate();
+	});
 
 	app.Run();
 

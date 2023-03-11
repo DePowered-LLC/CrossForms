@@ -6,8 +6,8 @@ namespace CrossForms.Native.MacOS;
 
 internal class ObjClass: NativeManaged<IntPtr> {
 	[DllImport(ObjC.COCOA, EntryPoint = "class_getName", CharSet = CharSet.Ansi)]
-	private static extern string GetName (IntPtr handle);
-	public string Name => GetName(inner);
+	private static extern IntPtr GetName (IntPtr handle);
+	public string Name => Marshal.PtrToStringAnsi(GetName(inner));
 
 	[DllImport(ObjC.COCOA, EntryPoint = "objc_getClassList")]
 	private static extern int GetClassList (IntPtr buffer, int count);
@@ -30,6 +30,11 @@ internal class ObjClass: NativeManaged<IntPtr> {
 		else return proto;
 	}
 
+	private static readonly IntPtr CLASS = ObjSelector.Get("class");
+	public static ObjClass Of (IntPtr instance) {
+		return new ObjClass { inner = ObjC.SendMessage(instance, CLASS) };
+	}
+
 
 	private static readonly IntPtr ALLOC_SEL = ObjSelector.Get("alloc");
 	public void Construct (NativeManaged<IntPtr> obj) {
@@ -45,6 +50,12 @@ internal class ObjClass: NativeManaged<IntPtr> {
 	[DllImport(ObjC.COCOA, EntryPoint = "objc_registerClassPair")]
 	private static extern void RegisterClassPair (IntPtr cls);
 
+	public ObjClass NewSubClass (string name) {
+		var cls = new ObjClass { inner = AllocateClassPair(inner, name, 0) };
+		RegisterClassPair(cls.inner);
+		return cls;
+	}
+
 	public ObjClass NewSubClass (string name, Action<ObjClass> fillClass) => NewSubClass(inner, name, fillClass);
 	public static ObjClass NewSubClass (IntPtr inner, string name, Action<ObjClass> fillClass) {
 		var cls = new ObjClass { inner = AllocateClassPair(inner, name, 0) };
@@ -53,19 +64,12 @@ internal class ObjClass: NativeManaged<IntPtr> {
 		return cls;
 	}
 
-	public ObjClass NewSubClass (string name) => NewSubClass(inner, name);
-	public static ObjClass NewSubClass (IntPtr inner, string name) {
-		var cls = new ObjClass { inner = AllocateClassPair(inner, name, 0) };
-		RegisterClassPair(cls.inner);
-		return cls;
-	}
-
 	[DllImport(ObjC.COCOA, EntryPoint = "class_isMetaClass")]
 	private static extern bool IsMetaClass (IntPtr cls);
 	public bool isMeta => IsMetaClass(inner);
 
-	[DllImport(ObjC.COCOA, EntryPoint = "method_getName", CharSet = CharSet.Ansi)]
-	private static extern string GetMethodName (IntPtr method);
+	[DllImport(ObjC.COCOA, EntryPoint = "method_getName")]
+	private static extern IntPtr GetMethodName (IntPtr method);
 
 	[DllImport(ObjC.COCOA, EntryPoint = "class_copyMethodList")]
 	private static extern unsafe IntPtr* CopyMethodList (IntPtr cls, ref uint count);
@@ -76,7 +80,7 @@ internal class ObjClass: NativeManaged<IntPtr> {
 
 			var result = new string[count];
 			for (uint i = 0; i < count; i++) {
-				result[i] = GetMethodName(list[i]);
+				result[i] = Marshal.PtrToStringAnsi(GetMethodName(list[i]))!;
 			}
 
 			Marshal.FreeHGlobal((IntPtr) list);
@@ -113,5 +117,10 @@ internal class ObjClass: NativeManaged<IntPtr> {
 		var sel = ObjSelector.Register(name);
 		ReplaceClassMethod(inner, sel, Marshal.GetFunctionPointerForDelegate(fn), types);
 		return sel;
+	}
+
+	private static readonly IntPtr IS_KIND_OF = ObjSelector.Get("isKindOfClass:");
+	public bool IsInstance (IntPtr mayBeInstance) {
+		return ObjC.SendMessage(mayBeInstance, IS_KIND_OF, inner) != IntPtr.Zero;
 	}
 }

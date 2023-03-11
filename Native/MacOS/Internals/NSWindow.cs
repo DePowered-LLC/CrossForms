@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using CrossForms.Native.Common;
 
 namespace CrossForms.Native.MacOS;
 
@@ -37,11 +38,33 @@ public class NSWindow: NSEventDispatcher {
 		child.OnAttach();
 	}
 
+	class Del: NativeManaged<IntPtr> {
+		public static ObjClass proto;
+		static Del () {
+			proto = NSObject.proto.NewSubClass("NSWindowDelegate");
+			// class_addProtocol(myWindowDelegateClass, @protocol(NSWindowDelegate));
+			proto.AddMethod("windowWillClose:", (WindowWillCloseFn) ((_, _, _) => Console.WriteLine("Smth!")), "v@:@");
+		}
+
+		public Del () {
+			proto.Construct(this);
+		}
+	}
+
 	public delegate void WindowWillCloseFn (IntPtr self, IntPtr sel, IntPtr notification);
 	public void OnClose (Action handle) {
+		// var cls = NSObject.proto.NewSubClass("NSWindowDelegate", cls => {
+		// 	cls.AddMethod("windowWillClose:", (WindowWillCloseFn) ((_, _, _) => Console.WriteLine("Smth!")), "v@:@");
+		// });
+
+		// var del = new Del();
+
 		// https://github.com/ritalin/osx_app_in_plain_ziglang/blob/dc03a6884b193828a0545b6c4c502e49ddcd313f/examples/hand_made_binding/src/appKit/widget/NSWindow.zig#L150
 		// https://github.com/ritalin/osx_app_in_plain_ziglang/blob/dc03a6884b193828a0545b6c4c502e49ddcd313f/examples/hand_made_binding/src/foundation/runtime/backend_helpers.c#L36
 		// ObjClass.Get("NSWindowDelegate").ReplaceMethod("windowWillClose:", (WindowWillCloseFn) ((_, _, _) => Console.WriteLine("Smth!")), "v@:@");
-		// AttachEvent(this, "windowWillClose:", handle);
+		AttachEvent(this, "windowWillClose:", handle);
+		// dispatcherClass.AddMethod("windowWillClose:", handle, "v@:@");
+		ObjC.SendMessage(inner, ObjSelector.Get("setDelegate:"), dispatcherInstance);
+		// ObjC.SendMessage(inner, ObjSelector.Get("setDelegate:"), del.inner);
 	}
 }

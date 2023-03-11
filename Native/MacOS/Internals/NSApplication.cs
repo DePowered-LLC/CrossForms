@@ -14,6 +14,8 @@ public class NSApplication: NativeManaged<IntPtr> {
 		appDelegate = new AppDelegate();
 	}
 
+	public bool isRunning => ObjC.SendMessage(inner, ObjSelector.Get("isRunning")) != IntPtr.Zero;
+
 	private AppDelegate _appDelegate;
 	private readonly IntPtr SET_DELEGATE = ObjSelector.Get("setDelegate:");
 	internal AppDelegate appDelegate {
@@ -33,5 +35,10 @@ public class NSApplication: NativeManaged<IntPtr> {
 	public void Run () {
 		ObjC.SendMessage(inner, ACTIVATE_IGNORING_OTHER_APPS, 1);
 		ObjC.SendMessage(inner, "run");
+	}
+
+	private static readonly IntPtr TERMINATE = ObjSelector.Get("terminate:");
+	public void Terminate () {
+		ObjC.SendMessage(inner, TERMINATE, IntPtr.Zero);
 	}
 }

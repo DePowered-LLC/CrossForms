@@ -7,5 +7,6 @@ public static class ObjType {
 		if (type == typeof(void)) builder.Append('v');
 		else if (type == typeof(IntPtr)) builder.Append('@');
 		else if (type == typeof(ObjSelector)) builder.Append(':');
+		else if (type == typeof(bool)) builder.Append('B');
 	}
 }
