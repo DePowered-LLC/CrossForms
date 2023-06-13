@@ -35,19 +35,19 @@ try {
 	btn.OnClick(() => {
 		Console.WriteLine("CLICK!!!");
 	});
-	btn.SetFrameOrigin(0, 300 - 0 - btn.Frame.size.height);
-	mainWindow.Append(btn);
 
+	mainWindow.Append(btn);
+	btn.TopAnchor.ConstraintToAnchor(mainWindow.ContentView.TopAnchor, 8).Active = true;
 
 	var btn2 = new NSButton("Test button 2");
 	btn2.OnClick(() => {
-		var origin = btn.Frame.origin;
-		origin.y += 1;
-		btn.SetFrameOrigin(origin);
-		Console.WriteLine("CLICK 2!!!");
+		mainWindow.Title = "CrossForms App " + DateTime.Now.Ticks;
 	});
-	btn2.SetFrameOrigin(0, 300 - 22 - btn2.Frame.size.height);
+
+	// btn2.SetFrameOrigin(0, 0);
+	// btn2.SetFrameOrigin(0, 300 - 22 - btn2.Frame.size.height);
 	mainWindow.Append(btn2);
+	btn2.TopAnchor.ConstraintToAnchor(btn.BottomAnchor, 5).Active = true;
 
 	mainWindow.OnClose(() => {
 		if (!app.isRunning) return;

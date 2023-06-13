@@ -10,6 +10,7 @@ public class NSButton: NSControl {
 	private static readonly IntPtr TITLED_BUTTON = ObjSelector.Get("buttonWithTitle:target:action:");
 	public NSButton (string title) {
 		inner = SendMessage(proto.inner, TITLED_BUTTON, new NSString(title).inner, NSApplication.current.appDelegate.inner, AppDelegate.NO_OP);
+		TranslatesAutoresizingMaskIntoConstraints = false;
 	}
 
 	private static readonly IntPtr SET_TARGET = ObjSelector.Get("setTarget:");
@@ -21,9 +22,10 @@ public class NSButton: NSControl {
 		});
 	}
 
+	private static readonly IntPtr GET_TITLE = ObjSelector.Get("title");
 	private static readonly IntPtr SET_TITLE = ObjSelector.Get("setTitle:");
-	public string title {
-		get { return null; }
+	public string Title {
+		get { return new NSString(ObjC.SendMessage(inner, GET_TITLE)).Value; }
 		set { ObjC.SendMessage(inner, SET_TITLE, new NSString(value).inner); }
 	}
 }

@@ -18,6 +18,21 @@ internal partial class ObjC {
 	[DllImport(COCOA, EntryPoint = "objc_msgSend")]
 	public static extern IntPtr SendMessage (IntPtr cls, IntPtr selector, int arg1);
 
+	[DllImport(COCOA, EntryPoint = "objc_msgSend")]
+	public static extern IntPtr SendMessage (IntPtr cls, IntPtr selector, bool arg1);
+
+	[DllImport(COCOA, EntryPoint = "objc_msgSend")]
+	public static extern IntPtr SendMessage (IntPtr cls, IntPtr selector, float arg1);
+
+	[DllImport(COCOA, EntryPoint = "objc_msgSend")]
+	public static extern IntPtr SendMessage (IntPtr cls, IntPtr selector, IntPtr arg1, float arg2);
+
+	[DllImport(COCOA, EntryPoint = "objc_msgSend")]
+	public static extern IntPtr SendMessage (IntPtr cls, IntPtr selector, IntPtr arg1, double arg2);
+
+	[DllImport(COCOA, EntryPoint = "objc_msgSend")]
+	public static extern IntPtr SendMessage (IntPtr cls, IntPtr selector, IntPtr arg1, int arg2, int arg3, IntPtr arg4, int arg5, float arg6, float arg7);
+
 	public static IntPtr SendMessage (IntPtr receiver, string selector) {
 		return SendMessage(receiver, ObjSelector.Get(selector));
 	}

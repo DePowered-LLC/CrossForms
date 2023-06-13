@@ -1,7 +1,7 @@
 using CrossForms.Native.Common;
 
 namespace CrossForms.Native.MacOS;
-public class NativeButton : IButton {
+public class NativeButton: IButton {
 	public string text { get; set; }
 
 	public int x { get; set; }
@@ -12,5 +12,8 @@ public class NativeButton : IButton {
 
 	public ushort height { get; set; }
 
-	public EventHandler<ClickEvent> OnClick { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+	public EventHandler<ClickEvent> OnClick {
+		get => throw new NotImplementedException();
+		set => throw new NotImplementedException();
+	}
 }
