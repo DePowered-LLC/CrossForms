@@ -25,16 +25,17 @@ public class NSWindow: NSEventDispatcher {
 		ObjC.SendMessage(inner, MAKE_KEY_AND_ORDER_FRONT, IntPtr.Zero);
 	}
 
+	private static readonly IntPtr GET_TITLE = ObjSelector.Get("title");
 	private static readonly IntPtr SET_TITLE = ObjSelector.Get("setTitle:");
-	public string title {
-		get { return null; }
+	public string Title {
+		get { return new NSString(ObjC.SendMessage(inner, GET_TITLE)).Value; }
 		set { ObjC.SendMessage(inner, SET_TITLE, new NSString(value).inner); }
 	}
 
-	public NSView contentView => new NSView { inner = ObjC.SendMessage(inner, "contentView") };
+	public NSView ContentView => new NSView { inner = ObjC.SendMessage(inner, "contentView") };
 	public void Append (NSControl child) {
 		child.parent = this;
-		contentView.AddSubview(child);
+		ContentView.AddSubview(child);
 		child.OnAttach();
 	}
 

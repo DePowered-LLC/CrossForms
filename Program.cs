@@ -29,7 +29,7 @@ try {
 		2
 	);
 
-	mainWindow.title = "CrossForms App";
+	mainWindow.Title = "CrossForms App";
 
 	var btn = new NSButton("Test button");
 	btn.OnClick(() => {

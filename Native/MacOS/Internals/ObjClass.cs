@@ -66,7 +66,7 @@ internal class ObjClass: NativeManaged<IntPtr> {
 
 	[DllImport(ObjC.COCOA, EntryPoint = "class_isMetaClass")]
 	private static extern bool IsMetaClass (IntPtr cls);
-	public bool isMeta => IsMetaClass(inner);
+	public bool IsMeta => IsMetaClass(inner);
 
 	[DllImport(ObjC.COCOA, EntryPoint = "method_getName")]
 	private static extern IntPtr GetMethodName (IntPtr method);
