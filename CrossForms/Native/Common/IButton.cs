@@ -7,6 +7,8 @@ public interface IButton {
 	ushort height { get; }
 
 	EventHandler<ClickEvent> OnClick { get; set; }
+
+	void SetNextControl(IButton next);
 }
 
 public struct ClickEvent {

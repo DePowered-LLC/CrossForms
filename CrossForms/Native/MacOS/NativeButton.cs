@@ -16,6 +16,15 @@ public class NativeButton : IButton {
         set => _onClick = value;
     }
 
+    internal NsButton? _nsButton;
+    internal NativeButton? _nextControl;
+
+    public void SetNextControl (IButton next) {
+        _nextControl = (NativeButton) next;
+        if (_nsButton != null && _nextControl._nsButton != null)
+            _nsButton.SetNextKeyView(_nextControl._nsButton);
+    }
+
     internal NsButton CreateNsButton () {
         var btn = new NsButton(text);
         btn.OnClick(() => {

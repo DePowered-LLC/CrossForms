@@ -68,6 +68,11 @@ public class NsView: NsNested {
 		SendMessage(inner, SET_FRAME_SIZE, size);
 	}
 
+	private static readonly IntPtr SET_NEXT_KEY_VIEW = ObjSelector.Get("setNextKeyView:");
+	public void SetNextKeyView (NsView view) {
+		ObjC.SendMessage(inner, SET_NEXT_KEY_VIEW, view.inner);
+	}
+
 	private static readonly IntPtr GET_AUTORESIZE_CONSTRAINING = ObjSelector.Get("translatesAutoresizingMaskIntoConstraints");
 	private static readonly IntPtr SET_AUTORESIZE_CONSTRAINING = ObjSelector.Get("setTranslatesAutoresizingMaskIntoConstraints:");
 	public bool TranslatesAutoresizingMaskIntoConstraints {

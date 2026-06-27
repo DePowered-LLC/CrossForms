@@ -6,4 +6,5 @@ public interface IForm {
 	ushort height { get; }
 
 	void Show ();
+	void SetInitialControl (IButton button);
 }

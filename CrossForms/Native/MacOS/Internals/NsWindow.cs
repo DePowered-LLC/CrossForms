@@ -52,6 +52,11 @@ public class NsWindow: NsEventDispatcher {
 		SendMessage(inner, SET_FRAME_ORIGIN, point);
 	}
 
+	private static readonly IntPtr SET_INITIAL_FIRST_RESPONDER = ObjSelector.Get("setInitialFirstResponder:");
+	public void SetInitialFirstResponder (NsView view) {
+		ObjC.SendMessage(inner, SET_INITIAL_FIRST_RESPONDER, view.inner);
+	}
+
 	public NsView ContentView => new NsView { inner = ObjC.SendMessage(inner, "contentView") };
 	public void Append (NsControl child) {
 		child.parent = this;

@@ -10,6 +10,9 @@ public class NativeButton: Control, IButton {
 
 	public EventHandler<ClickEvent> OnClick { get; set; } = (sender, e) => {};
 
+	internal NativeButton? _nextControl;
+	public void SetNextControl (IButton next) => _nextControl = (NativeButton) next;
+
 	protected override ControlCreationOptions GetCreationOptions () {
 		return new ControlCreationOptions {
 			className = "Button",

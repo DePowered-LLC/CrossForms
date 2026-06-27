@@ -7,4 +7,5 @@ public class NativeForm: IForm {
 	public ushort width => throw new NotImplementedException();
 	public ushort height => throw new NotImplementedException();
 	public void Show () => throw new NotImplementedException();
+	public void SetInitialControl (IButton button) => throw new NotImplementedException();
 }

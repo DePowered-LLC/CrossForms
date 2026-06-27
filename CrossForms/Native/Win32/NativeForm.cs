@@ -51,6 +51,9 @@ public class NativeForm: Control, IForm {
 		else return control.DispatchEvent(command);
 	}
 
+	private NativeButton? _initialControl;
+	public void SetInitialControl (IButton button) => _initialControl = (NativeButton) button;
+
 	public void Show () {
 		if (!IsLoaded) Load();
 		ShowWindow(handle, ShowWindowCommand.ShowNormal);
