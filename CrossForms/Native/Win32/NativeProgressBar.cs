@@ -42,8 +42,17 @@ public class NativeProgressBar: Control, IProgressBar {
 		get => _indeterminate;
 		set {
 			_indeterminate = value;
-			if (IsLoaded && value)
+			if (!IsLoaded) return;
+			var style = (uint) GetWindowLongPtr(handle, Gwl.Style);
+			if (value) {
+				SetWindowLongPtr(handle, Gwl.Style, (IntPtr) (style | (uint) ProgressStyle.Marquee));
 				SendMessage(handle, (uint) ProgressMessage.SetMarquee, 1, 30);
+			} else {
+				SendMessage(handle, (uint) ProgressMessage.SetMarquee, 0, 0);
+				SetWindowLongPtr(handle, Gwl.Style, (IntPtr) (style & ~(uint) ProgressStyle.Marquee));
+				SendMessage(handle, (uint) ProgressMessage.SetPos, (int) _value, 0);
+				InvalidateRect(handle, IntPtr.Zero, true);
+			}
 		}
 	}
 

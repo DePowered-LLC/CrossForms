@@ -11,13 +11,13 @@ internal partial class Internals {
 		IgnoreInserts = 0x00000200
 	}
 
-	[LibraryImport("user32.dll")]
+	[LibraryImport("user32.dll", EntryPoint = "GetMessageW")]
 	public static partial byte GetMessage (
 		out NativeMessage lpMsg, IntPtr windowHandle, uint wMsgFilterMin,
 		uint wMsgFilterMax
 	);
 
-	[LibraryImport("kernel32.dll", StringMarshalling = StringMarshalling.Utf8)]
+	[LibraryImport("kernel32.dll", EntryPoint = "FormatMessageA", StringMarshalling = StringMarshalling.Utf8)]
 	public static partial long FormatMessage (
 		FormatMessageFlag dwFlags, IntPtr lpSource, uint dwMessageId,
 		uint dwLanguageId, out string lpBuffer, uint nSize
@@ -26,7 +26,7 @@ internal partial class Internals {
 	[LibraryImport("user32.dll")]
 	public static partial byte TranslateMessage (in NativeMessage msg);
 
-	[LibraryImport("user32.dll")]
+	[LibraryImport("user32.dll", EntryPoint = "DispatchMessageW")]
 	public static partial byte DispatchMessage (in NativeMessage msg);
 
 	[StructLayout(LayoutKind.Sequential)]

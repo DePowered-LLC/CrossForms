@@ -27,6 +27,11 @@ public class NativeCheckBox: Control, ICheckBox {
 	public ushort Height { get; set; } = 22;
 	public EventHandler<CheckEvent> OnChange { get; set; } = (_, _) => {};
 
+	protected override void Load () {
+		base.Load();
+		if (_checked) SendMessage(handle, (uint) ButtonMessage.SetCheck, 1, 0);
+	}
+
 	protected override ControlCreationOptions GetCreationOptions () {
 		return new ControlCreationOptions {
 			className = "Button",

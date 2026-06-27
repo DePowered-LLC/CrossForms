@@ -13,6 +13,9 @@ internal partial class Internals {
 	public const uint WmLButtonUp = 0x0202;
 	public const uint WmUser = 0x0400;
 	public const uint WmTray = WmUser + 1;
+	public const uint WmSize = 0x0005;
+	public const uint WmCtlColorBtn = 0x0135;
+	public const uint WmCtlColorStatic = 0x0138;
 
 	[DllImport("user32.dll", SetLastError = true)]
 	private static extern ushort RegisterClassEx ([In] ref WindowClassEx lpwcx);
@@ -43,6 +46,9 @@ internal partial class Internals {
 	public static extern IntPtr GetWindowLongPtr (IntPtr handle, Gwl index);
 
 	[DllImport("user32.dll")]
+	public static extern IntPtr SetWindowLongPtr (IntPtr handle, Gwl index, IntPtr value);
+
+	[DllImport("user32.dll")]
 	public static extern IntPtr SetParent (IntPtr child, IntPtr parent);
 
 	[DllImport("user32.dll")]
@@ -64,6 +70,9 @@ internal partial class Internals {
 	public static extern bool EnableWindow (IntPtr hWnd, bool bEnable);
 
 	[DllImport("user32.dll")]
+	public static extern bool IsWindowEnabled (IntPtr hWnd);
+
+	[DllImport("user32.dll")]
 	public static extern IntPtr SendMessage (IntPtr hWnd, uint msg, int wParam, int lParam);
 
 	[DllImport("user32.dll")]
@@ -80,6 +89,15 @@ internal partial class Internals {
 
 	[DllImport("gdi32.dll")]
 	public static extern bool DeleteObject (IntPtr hObject);
+
+	[DllImport("gdi32.dll")]
+	public static extern IntPtr GetStockObject (int fnObject);
+
+	[DllImport("gdi32.dll")]
+	public static extern uint SetBkColor (IntPtr hdc, uint color);
+
+	[DllImport("user32.dll")]
+	public static extern bool InvalidateRect (IntPtr hWnd, IntPtr lpRect, bool bErase);
 
 	public static string GetWindowText (IntPtr hWnd) {
 		var sb = new System.Text.StringBuilder(256);
@@ -112,7 +130,8 @@ internal partial class Internals {
 				cbSize = (uint) Marshal.SizeOf<WindowClassEx>(),
 				lpfnWndProc = onMessage,
 				hInstance = GetModuleHandle(),
-				lpszClassName = className
+				lpszClassName = className,
+				hbrBackground = (IntPtr) (5 + 1) // COLOR_WINDOW + 1
 			};
 		}
 

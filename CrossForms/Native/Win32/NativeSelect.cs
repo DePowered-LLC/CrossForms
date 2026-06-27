@@ -58,7 +58,8 @@ public abstract class NativeSelectBase: Control, ISelect {
 
 	internal override IntPtr DispatchEvent (ushort command) {
 		if ((ComboCommand) command == ComboCommand.SelChange) {
-			onChange?.Invoke(this, new SelectChangeEvent { selectedIndex = SelectedIndex });
+			selectedIndex = SelectedIndex;
+			onChange?.Invoke(this, new SelectChangeEvent { selectedIndex = selectedIndex });
 			return 0;
 		}
 

@@ -1,4 +1,4 @@
-#if IS_WIN_X64 || IS_WIN_X86 || IS_WIN_ARM
+#if IS_WIN_X64 || IS_WIN_X86 || IS_WIN_ARM64
 global using CrossForms.Native.Win32;
 
 #elif IS_LINUX_X64 || IS_LINUX_ARM

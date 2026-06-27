@@ -69,6 +69,8 @@ public class NativeForm: Control, IForm {
 		};
 	}
 
+	private static readonly IntPtr WhiteBrush = GetStockObject(0);
+
 	private IntPtr OnWindowMessage (IntPtr window, uint msg, IntPtr wParam, IntPtr lParam) {
 		switch (msg) {
 			// Some control in window has emitted message
@@ -79,10 +81,20 @@ public class NativeForm: Control, IForm {
 			case WmClose:
 				DestroyWindow(window);
 				return 0;
-			// Window starts to be destoyed
+			// Window starts to be destroyed
 			case WmDestroy:
 				UnLoad();
 				return 0;
+			// Force full repaint when window is resized to avoid stale pixels
+			case WmSize:
+				InvalidateRect(window, IntPtr.Zero, true);
+				return 0;
+			// Make static controls use white background by default
+			case WmCtlColorStatic:
+			case WmCtlColorBtn:
+				if (!IsWindowEnabled(lParam)) break;
+				SetBkColor(wParam, 0x00FFFFFF);
+				return WhiteBrush;
 		}
 
 		return DefWindowProc(window, msg, wParam, lParam);
