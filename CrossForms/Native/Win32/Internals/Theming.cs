@@ -13,11 +13,13 @@ internal partial class Internals {
 	[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
 	public static extern IntPtr CreateActCtx (ref ActivationContext contextStruct);
 
-	[DllImport("kernel32.dll", SetLastError = true)]
-	public static extern bool ActivateActCtx (IntPtr context, out IntPtr cookie);
+	[LibraryImport("kernel32.dll", SetLastError = true)]
+	[return: MarshalAs(UnmanagedType.Bool)]
+	public static partial bool ActivateActCtx (IntPtr context, out IntPtr cookie);
 
-	[DllImport("kernel32.dll", SetLastError = true)]
-	public static extern bool DeactivateActCtx (int flags, IntPtr cookie);
+	[LibraryImport("kernel32.dll", SetLastError = true)]
+	[return: MarshalAs(UnmanagedType.Bool)]
+	public static partial bool DeactivateActCtx (int flags, IntPtr cookie);
 }
 
 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
