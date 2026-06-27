@@ -48,14 +48,10 @@ public class NativePictureBox: Control, IPictureBox {
 	}
 
 	private void ApplyImageData (byte[] data) {
-		var tmp = Path.ChangeExtension(Path.GetTempFileName(), ".bmp");
-		File.WriteAllBytes(tmp, data);
-		try {
-			var hNew = LoadImage(IntPtr.Zero, tmp, (uint) ImageType.Bitmap, Width, Height, 0x0010 /* LR_LOADFROMFILE */);
-			SetBitmap(hNew);
-		} finally {
-			File.Delete(tmp);
-		}
+		var physW = (int) (Width * NativeApplicationBase.DpiScale);
+		var physH = (int) (Height * NativeApplicationBase.DpiScale);
+		var hNew = HBitmapFromImageData(data, physW, physH);
+		SetBitmap(hNew);
 	}
 
 	private void SetBitmap (IntPtr hNew) {

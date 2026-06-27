@@ -29,6 +29,7 @@ public class NativeApplicationBase: ApplicationBase {
 		ActivateActCtx(ctxHandle, out _actCtx);
 
 		InitCommonControlsEx(ControlClass.Progress | ControlClass.Standard);
+		InitGdiplus();
 
 		// SetThemeAppProperties(ThemeAppProperty.AllowControls | ThemeAppProperty.AllowNonClient);
 
@@ -49,6 +50,7 @@ public class NativeApplicationBase: ApplicationBase {
 	}
 
 	public new static void Dispose () {
+		ShutdownGdiplus();
 		DeactivateActCtx(0, _actCtx);
 		_actCtx = IntPtr.Zero;
 	}
