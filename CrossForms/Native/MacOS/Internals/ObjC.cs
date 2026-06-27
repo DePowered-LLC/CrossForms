@@ -42,6 +42,9 @@ internal static partial class ObjC {
 	public static partial IntPtr SendMessage (IntPtr cls, IntPtr selector, IntPtr arg1, double arg2);
 
 	[LibraryImport(CocoaPath, EntryPoint = "objc_msgSend")]
+	public static partial IntPtr SendMessage (IntPtr cls, IntPtr selector, IntPtr arg1, nint arg2);
+
+	[LibraryImport(CocoaPath, EntryPoint = "objc_msgSend")]
 	public static partial IntPtr SendMessage (
 		IntPtr cls, IntPtr selector, IntPtr arg1, int arg2, int arg3, IntPtr arg4,
 		int arg5, float arg6, float arg7

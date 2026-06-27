@@ -13,6 +13,7 @@ public class NativeForm: IForm {
 	private readonly HashSet<NativeRadioGroup> _radioGroups = [];
 	private readonly List<NativeSelectBase> _selectChildren = [];
 	private readonly List<NativeProgressBar> _progressBarChildren = [];
+	private readonly List<NativePictureBox> _pictureBoxChildren = [];
 	private NativeButton? _initialControl;
 
 	private NsWindow? _window;
@@ -73,6 +74,10 @@ public class NativeForm: IForm {
 			AttachProgressBar(progressBar);
 		}
 
+		foreach (var pictureBox in _pictureBoxChildren) {
+			AttachPictureBox(pictureBox);
+		}
+
 		foreach (var btn in _children) {
 			if (btn.nextControl?.nsButton != null) {
 				btn.nsButton!.SetNextKeyView(btn.nextControl.nsButton);
@@ -83,6 +88,11 @@ public class NativeForm: IForm {
 		if (first?.nsButton != null) {
 			_window.SetInitialFirstResponder(first.nsButton);
 		}
+	}
+
+	public void Append (NativePictureBox pictureBox) {
+		_pictureBoxChildren.Add(pictureBox);
+		if (_window != null) AttachPictureBox(pictureBox);
 	}
 
 	public void Append (NativeProgressBar progressBar) {
@@ -132,6 +142,21 @@ public class NativeForm: IForm {
 		if (_window != null) {
 			AttachButton(button);
 		}
+	}
+
+	private void AttachPictureBox (NativePictureBox pictureBox) {
+		var nsIv = pictureBox.CreateNsImageView();
+		pictureBox.nsImageView = nsIv;
+		_window!.ContentView.AddSubview(nsIv);
+
+		var contentView = _window.ContentView;
+		var pw = pictureBox.Width > 0 ? (double) pictureBox.Width : 100;
+		var ph = pictureBox.Height > 0 ? (double) pictureBox.Height : 100;
+
+		nsIv.LeadingAnchor.ConstraintToAnchor(contentView.LeadingAnchor, pictureBox.X).Active = true;
+		nsIv.TopAnchor.ConstraintToAnchor(contentView.TopAnchor, pictureBox.Y).Active = true;
+		nsIv.WidthAnchor.ConstraintToConstant(pw).Active = true;
+		nsIv.HeightAnchor.ConstraintToConstant(ph).Active = true;
 	}
 
 	private void AttachProgressBar (NativeProgressBar progressBar) {

@@ -18,9 +18,10 @@ public class NativeButton: IButton {
 		get => nsButton?.Enabled ?? _enabled;
 		set {
 			_enabled = value;
-			if (nsButton != null) nsButton.Enabled = value;
+			nsButton?.Enabled = value;
 		}
 	}
+	
 	public int X { get; set; }
 	public int Y { get; set; }
 	public ushort Width { get; set; } = 120;
@@ -33,8 +34,9 @@ public class NativeButton: IButton {
 
 	public void SetNextControl (IButton next) {
 		nextControl = (NativeButton) next;
-		if (nsButton != null && nextControl.nsButton != null)
+		if (nsButton != null && nextControl.nsButton != null) {
 			nsButton.SetNextKeyView(nextControl.nsButton);
+		}
 	}
 
 	internal NsButton CreateNsButton () {

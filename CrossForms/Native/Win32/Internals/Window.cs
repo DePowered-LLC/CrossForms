@@ -67,10 +67,19 @@ internal partial class Internals {
 	public static extern IntPtr SendMessage (IntPtr hWnd, uint msg, int wParam, int lParam);
 
 	[DllImport("user32.dll")]
+	public static extern IntPtr SendMessage (IntPtr hWnd, uint msg, int wParam, IntPtr lParam);
+
+	[DllImport("user32.dll")]
 	public static extern IntPtr SendMessage (IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
 	[DllImport("user32.dll", CharSet = CharSet.Unicode)]
 	public static extern IntPtr SendMessage (IntPtr hWnd, uint msg, int wParam, string lParam);
+
+	[DllImport("user32.dll", CharSet = CharSet.Unicode)]
+	public static extern IntPtr LoadImage (IntPtr hinst, string lpszName, uint uType, int cxDesired, int cyDesired, uint fuLoad);
+
+	[DllImport("gdi32.dll")]
+	public static extern bool DeleteObject (IntPtr hObject);
 
 	public static string GetWindowText (IntPtr hWnd) {
 		var sb = new System.Text.StringBuilder(256);

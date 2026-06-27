@@ -22,10 +22,15 @@
 
     <ItemGroup>
         <Resource Include="app.manifest"/>
+        <EmbeddedResource Include="Assets\Demo1.jpg" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="../CrossForms/CrossForms.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Assets\" />
     </ItemGroup>
 
     <Target Name="CreateMacOSAppBundle" AfterTargets="Publish" Condition="$(RuntimeIdentifier.StartsWith('osx'))">

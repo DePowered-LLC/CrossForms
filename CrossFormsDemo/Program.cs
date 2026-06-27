@@ -1,5 +1,7 @@
 using CrossForms.Components;
 using CrossForms.Native;
+using CrossForms.Platform;
+
 
 try {
 	Application.Start();
@@ -76,9 +78,47 @@ try {
 	};
 	checkSpinner.OnChange += (_, _) => { spinner.Indeterminate = checkSpinner.Checked; };
 	Application.MainWindow.Append(checkSpinner);
+	
+	var resourceSelect = new Select<AssetItem>(GetAssetItems()) {
+		X = 10, Y = 310, Width = 400
+	};
+	Application.MainWindow.Append(resourceSelect);
+
+	var resourcePicture = new PictureBox {
+		X = 10, Y = 340, Width = 400, Height = 200
+	};
+	Application.MainWindow.Append(resourcePicture);
+
+	resourceSelect.OnChange += (_, _) => {
+		if (resourceSelect.ActiveItem?.Resource is null) {
+			resourcePicture.ImageData = null;
+			return;
+		}
+		
+		resourcePicture.ImageData = resourceSelect.ActiveItem.Resource.Value.ToBuffer();
+	};
 
 	Application.MainWindow.Show();
 	Application.Run();
 } catch (NativeException err) {
 	Console.Error.WriteLine(err.ToString());
+}
+
+
+static AssetItem[] GetAssetItems () {
+	var result = new List<AssetItem> {
+		new("None", null)
+	};
+
+	foreach (var resource in Resource.GetAll()) {
+		result.Add(new AssetItem(resource.Id, resource));
+	}
+
+	return result.ToArray();
+}
+
+internal record AssetItem (string Name, Resource? Resource) {
+	public override string ToString () {
+		return Name;
+	}
 }

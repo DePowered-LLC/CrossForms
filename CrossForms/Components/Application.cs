@@ -1,7 +1,10 @@
+using System.Reflection;
+
 namespace CrossForms.Components;
 
 
 public class Application {
+	public static readonly Assembly Assembly = Assembly.GetEntryAssembly()!;
 	public static Form? MainWindow;
 
 	public static void Start () {
@@ -10,8 +13,6 @@ public class Application {
 
 	public static void Run () {
 		while (NativeApplicationBase.EventLoop()) ;
-
 		NativeApplicationBase.Dispose();
-		Console.WriteLine("Event loop exited");
 	}
 }

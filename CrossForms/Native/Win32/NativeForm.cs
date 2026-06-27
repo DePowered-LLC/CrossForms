@@ -29,6 +29,10 @@ public class NativeForm: Control, IForm {
 		ShowWindow(handle, ShowWindowCommand.ShowNormal);
 	}
 
+	public void Append (NativePictureBox pictureBox) {
+		Append((Control) pictureBox);
+	}
+
 	public void Append (NativeProgressBar progressBar) {
 		Append((Control) progressBar);
 	}

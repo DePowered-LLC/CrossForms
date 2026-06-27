@@ -1,0 +1,76 @@
+using CrossForms.Native.Common;
+using CrossForms.Native.Win32.Internals;
+
+using static CrossForms.Native.Win32.Internals.Internals;
+
+namespace CrossForms.Native.Win32;
+
+
+public class NativePictureBox: Control, IPictureBox {
+	private string _imagePath = "";
+	private byte[]? _imageData;
+	private IntPtr _hBitmap = IntPtr.Zero;
+
+	public string ImagePath {
+		get => _imagePath;
+		set {
+			_imagePath = value;
+			_imageData = null;
+			if (IsLoaded) ApplyImage();
+		}
+	}
+
+	public byte[]? ImageData {
+		get => _imageData;
+		set {
+			_imageData = value;
+			if (value != null) {
+				_imagePath = "";
+				if (IsLoaded) ApplyImageData(value);
+			}
+		}
+	}
+
+	public int X { get; set; }
+	public int Y { get; set; }
+	public ushort Width { get; set; } = 100;
+	public ushort Height { get; set; } = 100;
+
+	protected override void Load () {
+		base.Load();
+		if (_imageData != null) ApplyImageData(_imageData);
+		else if (_imagePath != "") ApplyImage();
+	}
+
+	private void ApplyImage () {
+		var hNew = LoadImage(IntPtr.Zero, _imagePath, (uint) ImageType.Bitmap, Width, Height, 0x0010 /* LR_LOADFROMFILE */);
+		SetBitmap(hNew);
+	}
+
+	private void ApplyImageData (byte[] data) {
+		var tmp = Path.ChangeExtension(Path.GetTempFileName(), ".bmp");
+		File.WriteAllBytes(tmp, data);
+		try {
+			var hNew = LoadImage(IntPtr.Zero, tmp, (uint) ImageType.Bitmap, Width, Height, 0x0010 /* LR_LOADFROMFILE */);
+			SetBitmap(hNew);
+		} finally {
+			File.Delete(tmp);
+		}
+	}
+
+	private void SetBitmap (IntPtr hNew) {
+		SendMessage(handle, (uint) StaticMessage.SetImage, (int) ImageType.Bitmap, hNew);
+		if (_hBitmap != IntPtr.Zero) DeleteObject(_hBitmap);
+		_hBitmap = hNew;
+	}
+
+	protected override ControlCreationOptions GetCreationOptions () => new() {
+		className = "Static",
+		style = WindowStyle.Visible | WindowStyle.Child | (WindowStyle) (uint) StaticStyle.Bitmap,
+		label = "",
+		width = Width,
+		height = Height,
+		x = X,
+		y = Y
+	};
+}
