@@ -1,12 +1,15 @@
 using System.Runtime.InteropServices;
 
-namespace CrossForms.Native.Win32;
-internal partial class Internals {
-	[DllImport("ComCtl32.dll", ExactSpelling = true)]
-	public static extern void InitCommonControls ();
+namespace CrossForms.Native.Win32.Internals;
 
-	[DllImport("ComCtl32.dll", ExactSpelling = true)]
-	public static extern bool InitCommonControlsEx (ref InitControlsEx initInfo);
+
+internal partial class Internals {
+	[LibraryImport("ComCtl32.dll")]
+	public static partial void InitCommonControls ();
+
+	[LibraryImport("ComCtl32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool InitCommonControlsEx (ref InitControlsEx initInfo);
 
 	public static bool InitCommonControlsEx (ControlClass classes) {
 		var initInfo = new InitControlsEx {
@@ -50,7 +53,10 @@ public enum ControlClass: uint {
 	/// <summary>Load animate control class</summary>
 	Animate = 0x00000080,
 
-	/// <summary>Load animate control, header, hot key, list-view, progress bar, status bar, tab, tooltip, toolbar, trackbar, tree-view, and up-down control classes</summary>
+	/// <summary>
+	///     Load animate control, header, hot key, list-view, progress bar, status bar, tab, tooltip, toolbar, trackbar,
+	///     tree-view, and up-down control classes
+	/// </summary>
 	Win95 = 0x000000FF,
 
 	/// <summary>Load date and time picker control class</summary>
@@ -63,13 +69,17 @@ public enum ControlClass: uint {
 	Cool = 0x00000400,
 
 	Internet = 0x00000800,
+
 	/// <summary>Load pager control class</summary>
 	PageScroller = 0x00001000,
 
 	/// <summary>Load a native font control class</summary>
 	NativeFont = 0x00002000,
 
-	/// <summary>Load one of the intrinsic User32 control classes. The user controls include button, edit, static, listbox, combobox, and scroll bar.</summary>
+	/// <summary>
+	///     Load one of the intrinsic User32 control classes. The user controls include button, edit, static, listbox,
+	///     combobox, and scroll bar.
+	/// </summary>
 	Standard = 0x00004000,
 
 	/// <summary>Load a hyperlink control class</summary>

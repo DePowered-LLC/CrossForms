@@ -1,4 +1,6 @@
 namespace CrossForms.Native.Common;
+
+
 public interface IButton {
 	string text { get; }
 	int x { get; }
@@ -8,7 +10,7 @@ public interface IButton {
 
 	EventHandler<ClickEvent> OnClick { get; set; }
 
-	void SetNextControl(IButton next);
+	void SetNextControl (IButton next);
 }
 
 public struct ClickEvent {

@@ -1,4 +1,4 @@
 <Solution>
-  <Project Path="CrossForms/CrossForms.csproj" />
-  <Project Path="CrossFormsDemo/CrossFormsDemo.csproj" />
+    <Project Path="CrossForms/CrossForms.csproj"/>
+    <Project Path="CrossFormsDemo/CrossFormsDemo.csproj"/>
 </Solution>

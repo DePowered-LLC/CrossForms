@@ -1,23 +1,28 @@
-namespace CrossForms.Native.MacOS.Internals;
+using CrossForms.Native.MacOS.Internals;
 
-public class CocoaSynchronizationContext : SynchronizationContext {
-    private readonly int _mainThreadId = Environment.CurrentManagedThreadId;
+namespace CrossForms.Native.MacOS;
 
-    public static void Install() {
-        SetSynchronizationContext(new CocoaSynchronizationContext());
-    }
 
-    public override void Post(SendOrPostCallback d, object? state) {
-        Dispatch.Post(() => d(state));
-    }
+public class CocoaSynchronizationContext: SynchronizationContext {
+	private readonly int _mainThreadId = Environment.CurrentManagedThreadId;
 
-    public override void Send(SendOrPostCallback d, object? state) {
-        if (Environment.CurrentManagedThreadId == _mainThreadId) {
-            d(state);
-        } else {
-            Dispatch.Send(() => d(state));
-        }
-    }
+	public static void Install () {
+		SetSynchronizationContext(new CocoaSynchronizationContext());
+	}
 
-    public override SynchronizationContext CreateCopy() => new CocoaSynchronizationContext();
+	public override void Post (SendOrPostCallback d, object? state) {
+		Dispatch.Post(() => d(state));
+	}
+
+	public override void Send (SendOrPostCallback d, object? state) {
+		if (Environment.CurrentManagedThreadId == _mainThreadId) {
+			d(state);
+		} else {
+			Dispatch.Send(() => d(state));
+		}
+	}
+
+	public override SynchronizationContext CreateCopy () {
+		return new CocoaSynchronizationContext();
+	}
 }

@@ -4,11 +4,14 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace CrossForms.Native.Common;
+
+
 using DelegateCreator = Func<Type[], Type>;
 
 public class NativeArg {
 	public required Type type;
 	public required object value;
+
 	public static NativeArg From<T> (T value) where T: notnull {
 		return new NativeArg {
 			type = typeof(T),
@@ -16,11 +19,25 @@ public class NativeArg {
 		};
 	}
 
-	public static implicit operator NativeArg (int value) => From(value);
-	public static implicit operator NativeArg (bool value) => From(value ? 1 : 0);
-	public static implicit operator NativeArg (long value) => From(value);
-	public static implicit operator NativeArg (IntPtr value) => From(value);
-	public static implicit operator NativeArg (NativeManaged<IntPtr> value) => value.inner;
+	public static implicit operator NativeArg (int value) {
+		return From(value);
+	}
+
+	public static implicit operator NativeArg (bool value) {
+		return From(value ? 1 : 0);
+	}
+
+	public static implicit operator NativeArg (long value) {
+		return From(value);
+	}
+
+	public static implicit operator NativeArg (IntPtr value) {
+		return From(value);
+	}
+
+	public static implicit operator NativeArg (NativeManaged<IntPtr> value) {
+		return value.inner;
+	}
 
 	// public delegate void WriteFn (ref IntPtr cursor);
 	// public WriteFn Write;
@@ -82,15 +99,17 @@ public class NativeArg {
 	// }
 }
 
-[RequiresDynamicCode(NativeFn.DynamicCodeReason)]
-[RequiresUnreferencedCode(NativeFn.DynamicCodeReason)]
+[RequiresDynamicCode(DynamicCodeReason)]
+[RequiresUnreferencedCode(DynamicCodeReason)]
 public class NativeFn {
 	internal const string DynamicCodeReason = "NativeFn uses dynamic delegate creation via internal BCL types.";
 
 	public static readonly DelegateCreator MakeDelegate;
+
 	static NativeFn () {
 		var helperType = typeof(Expression).Assembly.GetType("System.Linq.Expressions.Compiler.DelegateHelpers");
-		var creatorMethod = helperType!.GetMethod("MakeNewCustomDelegate", BindingFlags.NonPublic | BindingFlags.Static);
+		var creatorMethod =
+			helperType!.GetMethod("MakeNewCustomDelegate", BindingFlags.NonPublic | BindingFlags.Static);
 		MakeDelegate = (DelegateCreator) Delegate.CreateDelegate(typeof(DelegateCreator), creatorMethod!);
 	}
 

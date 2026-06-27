@@ -1,33 +1,33 @@
 namespace CrossForms.Native.MacOS.Internals;
 
+
 public class NsControl: NsView {
+	private Dictionary<string, PreRegisteredEvent>? _preRegisteredEvents = new();
+
 	public NsEventDispatcher GetEventDispatcher () {
-		NsNested? nextParent = parent;
-		while (nextParent != null)  {
+		var nextParent = parent;
+		while (nextParent != null) {
 			if (nextParent is NsEventDispatcher dispatcher) return dispatcher;
-			else nextParent = nextParent.parent;
+			nextParent = nextParent.parent;
 		}
 
 		throw new Exception("Root NSEventDispatcher not provided!");
 	}
 
-	private struct PreRegisteredEvent {
-		public Action handler;
-		public Action<NsEventDispatcher, IntPtr> register;
-	}
-
-	private Dictionary<string, PreRegisteredEvent>? preRegisteredEvents = new();
-	protected void PreRegisterEvent (string name, Action eventHandler, Action<NsEventDispatcher, IntPtr> registerHandler) {
-		if (preRegisteredEvents == null) {
+	protected void PreRegisterEvent (
+		string name, Action eventHandler,
+		Action<NsEventDispatcher, IntPtr> registerHandler
+	) {
+		if (_preRegisteredEvents == null) {
 			var dispatcher = GetEventDispatcher();
 			var eventSel = dispatcher.AttachEvent(this, name, eventHandler);
 			registerHandler(dispatcher, eventSel);
 		} else {
-			if (preRegisteredEvents.TryGetValue(name, out PreRegisteredEvent e)) {
+			if (_preRegisteredEvents.TryGetValue(name, out var e)) {
 				e.handler += eventHandler;
 				e.register += registerHandler;
 			} else {
-				preRegisteredEvents.Add(name, new PreRegisteredEvent {
+				_preRegisteredEvents.Add(name, new PreRegisteredEvent {
 					handler = eventHandler,
 					register = registerHandler
 				});
@@ -36,14 +36,19 @@ public class NsControl: NsView {
 	}
 
 	public void OnAttach () {
-		if (preRegisteredEvents == null) return;
+		if (_preRegisteredEvents == null) return;
 
 		var dispatcher = GetEventDispatcher();
-		foreach (var pair in preRegisteredEvents) {
+		foreach (var pair in _preRegisteredEvents) {
 			var eventSel = dispatcher.AttachEvent(this, pair.Key, pair.Value.handler);
 			pair.Value.register(dispatcher, eventSel);
 		}
 
-		preRegisteredEvents = null;
+		_preRegisteredEvents = null;
+	}
+
+	private struct PreRegisteredEvent {
+		public Action handler;
+		public Action<NsEventDispatcher, IntPtr> register;
 	}
 }

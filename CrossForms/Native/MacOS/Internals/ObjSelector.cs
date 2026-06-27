@@ -2,13 +2,14 @@ using System.Runtime.InteropServices;
 
 namespace CrossForms.Native.MacOS.Internals;
 
-internal class ObjSelector {
-	[DllImport(ObjC.COCOA, EntryPoint = "sel_registerName", CharSet = CharSet.Ansi)]
-    public static extern IntPtr Register (string selector);
 
-	[DllImport(ObjC.COCOA, EntryPoint = "sel_getUid", CharSet = CharSet.Ansi)]
-    public static extern IntPtr Get (string selector);
+internal partial class ObjSelector {
+	[LibraryImport(ObjC.CocoaPath, EntryPoint = "sel_registerName", StringMarshalling = StringMarshalling.Utf8)]
+	public static partial IntPtr Register (string selector);
 
-	[DllImport(ObjC.COCOA, EntryPoint = "sel_getName", CharSet = CharSet.Ansi)]
-    public static extern IntPtr GetName (IntPtr selector);
+	[LibraryImport(ObjC.CocoaPath, EntryPoint = "sel_getUid", StringMarshalling = StringMarshalling.Utf8)]
+	public static partial IntPtr Get (string selector);
+
+	[LibraryImport(ObjC.CocoaPath, EntryPoint = "sel_getName", StringMarshalling = StringMarshalling.Utf8)]
+	public static partial IntPtr GetName (IntPtr selector);
 }

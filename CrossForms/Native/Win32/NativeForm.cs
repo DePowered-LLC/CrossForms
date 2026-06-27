@@ -1,8 +1,14 @@
+using CrossForms.Components;
 using CrossForms.Native.Common;
-using static CrossForms.Native.Win32.Internals;
+using CrossForms.Native.Win32.Internals;
+
+using static CrossForms.Native.Win32.Internals.Internals;
 
 namespace CrossForms.Native.Win32;
+
+
 public class NativeForm: Control, IForm {
+	private NativeButton? _initialControl;
 	private WindowClassEx windowClass;
 
 	public required string id { get; set; }
@@ -10,11 +16,18 @@ public class NativeForm: Control, IForm {
 	public ushort width { get; set; } = 420;
 	public ushort height { get; set; } = 380;
 
+	public void SetInitialControl (IButton button) {
+		_initialControl = (NativeButton) button;
+	}
+
+	public void Show () {
+		if (!IsLoaded) Load();
+		ShowWindow(handle, ShowWindowCommand.ShowNormal);
+	}
+
 	protected override ControlCreationOptions GetCreationOptions () {
 		windowClass = WindowClassEx.CreateDefault(id, OnWindowMessage);
-		if (!windowClass.Register()) {
-			throw new Win32Exception($"Cannot register \"{id}\" window class");
-		}
+		if (!windowClass.Register()) throw new Win32Exception($"Cannot register \"{id}\" window class");
 
 		return new ControlCreationOptions {
 			className = id,
@@ -30,16 +43,16 @@ public class NativeForm: Control, IForm {
 		switch (msg) {
 			// Some control in window has emitted message
 			// https://docs.microsoft.com/en-us/windows/win32/menurc/wm-command#remarks
-			case WM_COMMAND:
+			case WmCommand:
 				return OnWindowCommand(High(wParam), lParam);
 			// Window close requested
-			case WM_CLOSE:
+			case WmClose:
 				DestroyWindow(window);
-				return (IntPtr) 0;
+				return 0;
 			// Window starts to be destoyed
-			case WM_DESTROY:
+			case WmDestroy:
 				UnLoad();
-				return (IntPtr) 0;
+				return 0;
 		}
 
 		return DefWindowProc(window, msg, wParam, lParam);
@@ -47,23 +60,15 @@ public class NativeForm: Control, IForm {
 
 	private IntPtr OnWindowCommand (ushort command, IntPtr controlHandle) {
 		var control = GetChild(controlHandle);
-		if (control == null) return (IntPtr) (-1);
-		else return control.DispatchEvent(command);
-	}
-
-	private NativeButton? _initialControl;
-	public void SetInitialControl (IButton button) => _initialControl = (NativeButton) button;
-
-	public void Show () {
-		if (!IsLoaded) Load();
-		ShowWindow(handle, ShowWindowCommand.ShowNormal);
+		if (control == null) return -1;
+		return control.DispatchEvent(command);
 	}
 
 	protected override void UnLoad () {
 		windowClass.UnRegister();
 
-		if (Application.mainWindow != null) {
-			if ((IForm) this == Application.mainWindow) PostQuitMessage(0);
-		}
+		if (Application.mainWindow != null)
+			if ((IForm) this == Application.mainWindow)
+				PostQuitMessage(0);
 	}
 }

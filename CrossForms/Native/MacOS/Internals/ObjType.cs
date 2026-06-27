@@ -2,6 +2,7 @@ using System.Text;
 
 namespace CrossForms.Native.MacOS.Internals;
 
+
 public static class ObjType {
 	public static void Append (StringBuilder builder, Type type) {
 		if (type == typeof(void)) builder.Append('v');

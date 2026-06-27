@@ -1,6 +1,7 @@
 namespace CrossForms.Native.MacOS.Internals;
 
-internal enum NsLayoutRelation: int {
+
+internal enum NsLayoutRelation {
 	LessOrEqual,
 	Equal,
 	GreaterOrEqual

@@ -2,52 +2,64 @@ using CrossForms.Native.Common;
 
 namespace CrossForms.Native.MacOS.Internals;
 
-public class NsApplication: NativeManaged<IntPtr> {
-	public enum ActivationPolicy { Regular, Accessory, Prohibited }
-	private static ObjClass proto = ObjClass.Get("NSApplication");
 
-	public static NsApplication current = null!;
-	private static readonly IntPtr SHARED_APP = ObjSelector.Get("sharedApplication");
-	public NsApplication () {
-		current = this;
-		proto.Construct(this, SHARED_APP);
-		appDelegate = new AppDelegate();
+public class NsApplication: NativeManaged<IntPtr> {
+	public enum ActivationPolicy {
+		Regular,
+		Accessory,
+		Prohibited
 	}
 
-	public bool isRunning => ObjC.SendMessage(inner, ObjSelector.Get("isRunning")) != IntPtr.Zero;
+	private static readonly ObjClass Proto = ObjClass.Get("NSApplication");
+
+	public static NsApplication Current = null!;
+	private static readonly IntPtr SharedApp = ObjSelector.Get("sharedApplication");
+
+	private static readonly IntPtr TerminateSel = ObjSelector.Get("terminate:");
+
+	private static readonly IntPtr CurrentEventSel = ObjSelector.Get("currentEvent");
+
+	private readonly IntPtr _activateIgnoringOtherAppsSel = ObjSelector.Get("activateIgnoringOtherApps:");
+
+	private readonly IntPtr _setActivationPolicySel = ObjSelector.Get("setActivationPolicy:");
+	private readonly IntPtr _setDelegateSel = ObjSelector.Get("setDelegate:");
 
 	private AppDelegate _appDelegate = null!;
-	private readonly IntPtr SET_DELEGATE = ObjSelector.Get("setDelegate:");
-	internal AppDelegate appDelegate {
+
+	public NsApplication () {
+		Current = this;
+		Proto.Construct(this, SharedApp);
+		AppDelegate = new AppDelegate();
+	}
+
+	public bool IsRunning => ObjC.SendMessage(inner, ObjSelector.Get("isRunning")) != IntPtr.Zero;
+
+	internal AppDelegate AppDelegate {
 		get => _appDelegate;
 		set {
-			ObjC.SendMessage(inner, SET_DELEGATE, value.inner);
+			ObjC.SendMessage(inner, _setDelegateSel, value.inner);
 			_appDelegate = value;
 		}
 	}
 
-	private readonly IntPtr SET_ACTIVATION_POLICY = ObjSelector.Get("setActivationPolicy:");
-	public void SetActivationPolicy (ActivationPolicy value) {
-		ObjC.SendMessage(inner, SET_ACTIVATION_POLICY, (int) value);
+	public NsEvent? CurrentEvent {
+		get {
+			var ptr = ObjC.SendMessage(inner, CurrentEventSel);
+			return ptr == IntPtr.Zero ? null : new NsEvent { inner = ptr };
+		}
 	}
 
-	private readonly IntPtr ACTIVATE_IGNORING_OTHER_APPS = ObjSelector.Get("activateIgnoringOtherApps:");
+	public void SetActivationPolicy (ActivationPolicy value) {
+		ObjC.SendMessage(inner, _setActivationPolicySel, (int) value);
+	}
+
 	public void Run () {
 		CocoaSynchronizationContext.Install();
-		ObjC.SendMessage(inner, ACTIVATE_IGNORING_OTHER_APPS, 1);
+		ObjC.SendMessage(inner, _activateIgnoringOtherAppsSel, 1);
 		ObjC.SendMessage(inner, "run");
 	}
 
-	private static readonly IntPtr TERMINATE = ObjSelector.Get("terminate:");
 	public void Terminate () {
-		ObjC.SendMessage(inner, TERMINATE, IntPtr.Zero);
-	}
-
-	private static readonly IntPtr CURRENT_EVENT = ObjSelector.Get("currentEvent");
-	public NsEvent? CurrentEvent {
-		get {
-			var ptr = ObjC.SendMessage(inner, CURRENT_EVENT);
-			return ptr == IntPtr.Zero ? null : new NsEvent { inner = ptr };
-		}
+		ObjC.SendMessage(inner, TerminateSel, IntPtr.Zero);
 	}
 }

@@ -1,4 +1,6 @@
 namespace CrossForms.Native.Common;
+
+
 public interface IForm {
 	string id { get; }
 	string title { get; }

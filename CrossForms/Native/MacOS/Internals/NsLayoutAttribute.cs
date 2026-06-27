@@ -1,6 +1,7 @@
 namespace CrossForms.Native.MacOS.Internals;
 
-internal enum NsLayoutAttribute: int {
+
+internal enum NsLayoutAttribute {
 	NotAnAttribute,
 	Left,
 	Right,

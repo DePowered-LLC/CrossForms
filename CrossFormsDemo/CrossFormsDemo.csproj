@@ -1,64 +1,64 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-
-    <PublishAot>true</PublishAot>
-    <TrimMode>full</TrimMode>
-    <StripSymbols>true</StripSymbols>
-    <SelfContained>true</SelfContained>
-    <PublishTrimmed>true</PublishTrimmed>
-    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Company>DePowered</Company>
-    <PackageId>org.depowered.crossformsdemo</PackageId>
-    <Version>1.0.0</Version>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Resource Include="app.manifest" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="../CrossForms/CrossForms.csproj" />
-  </ItemGroup>
-
-  <Target Name="CreateMacOSAppBundle" AfterTargets="Publish" Condition="$(RuntimeIdentifier.StartsWith('osx'))">
     <PropertyGroup>
-      <_BundleContents>$(PublishDir)$(AssemblyName).app/Contents</_BundleContents>
-    </PropertyGroup>
-    <Exec Command="rm -rf &quot;$(PublishDir)$(AssemblyName).app&quot;" />
-    <MakeDir Directories="$(_BundleContents)/MacOS;$(_BundleContents)/Resources" />
-    <Copy SourceFiles="$(PublishDir)$(AssemblyName)" DestinationFolder="$(_BundleContents)/MacOS/" />
-    <Copy SourceFiles="$(MSBuildProjectDirectory)/Info.plist" DestinationFolder="$(_BundleContents)/" />
-    <Exec Command="codesign --sign - --force --deep &quot;$(PublishDir)$(AssemblyName).app&quot;" />
-    <Message Importance="high" Text="App bundle: $(PublishDir)$(AssemblyName).app" />
-  </Target>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-  <Target Name="CreateMacOSPkg" AfterTargets="CreateMacOSAppBundle" Condition="$(RuntimeIdentifier.StartsWith('osx'))">
-    <PropertyGroup>
-      <_PkgPayload>$(PublishDir)_pkg_payload</_PkgPayload>
-      <_PkgOutput>$(PublishDir)$(AssemblyName).pkg</_PkgOutput>
-    </PropertyGroup>
-    <RemoveDir Directories="$(_PkgPayload)" />
-    <MakeDir Directories="$(_PkgPayload)" />
-    <Exec Command="ditto &quot;$(PublishDir)$(AssemblyName).app&quot; &quot;$(_PkgPayload)/$(AssemblyName).app&quot;" />
-    <Exec Command="pkgbuild --root &quot;$(_PkgPayload)&quot; --identifier &quot;$(PackageId)&quot; --version &quot;$(Version)&quot; --install-location /Applications &quot;$(_PkgOutput)&quot;" />
-    <RemoveDir Directories="$(_PkgPayload)" />
-    <Message Importance="high" Text="PKG installer: $(_PkgOutput)" />
-  </Target>
+        <PublishAot>true</PublishAot>
+        <TrimMode>full</TrimMode>
+        <StripSymbols>true</StripSymbols>
+        <SelfContained>true</SelfContained>
+        <PublishTrimmed>true</PublishTrimmed>
+        <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
 
-  <Target Name="CleanMacOSPublishDir" AfterTargets="CreateMacOSPkg" Condition="$(RuntimeIdentifier.StartsWith('osx'))">
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <Company>DePowered</Company>
+        <PackageId>org.depowered.crossformsdemo</PackageId>
+        <Version>1.0.0</Version>
+    </PropertyGroup>
+
     <ItemGroup>
-      <_PublishExtras Include="$(PublishDir)*" Exclude="$(PublishDir)$(AssemblyName).app/**;$(PublishDir)$(AssemblyName).app;$(PublishDir)$(AssemblyName).pkg" />
+        <Resource Include="app.manifest"/>
     </ItemGroup>
-    <Delete Files="@(_PublishExtras)" />
-    <RemoveDir Directories="$(PublishDir)$(AssemblyName).dSYM" />
-  </Target>
+
+    <ItemGroup>
+        <ProjectReference Include="../CrossForms/CrossForms.csproj"/>
+    </ItemGroup>
+
+    <Target Name="CreateMacOSAppBundle" AfterTargets="Publish" Condition="$(RuntimeIdentifier.StartsWith('osx'))">
+        <PropertyGroup>
+            <_BundleContents>$(PublishDir)$(AssemblyName).app/Contents</_BundleContents>
+        </PropertyGroup>
+        <Exec Command="rm -rf &quot;$(PublishDir)$(AssemblyName).app&quot;"/>
+        <MakeDir Directories="$(_BundleContents)/MacOS;$(_BundleContents)/Resources"/>
+        <Copy SourceFiles="$(PublishDir)$(AssemblyName)" DestinationFolder="$(_BundleContents)/MacOS/"/>
+        <Copy SourceFiles="$(MSBuildProjectDirectory)/Info.plist" DestinationFolder="$(_BundleContents)/"/>
+        <Exec Command="codesign --sign - --force --deep &quot;$(PublishDir)$(AssemblyName).app&quot;"/>
+        <Message Importance="high" Text="App bundle: $(PublishDir)$(AssemblyName).app"/>
+    </Target>
+
+    <Target Name="CreateMacOSPkg" AfterTargets="CreateMacOSAppBundle" Condition="$(RuntimeIdentifier.StartsWith('osx'))">
+        <PropertyGroup>
+            <_PkgPayload>$(PublishDir)_pkg_payload</_PkgPayload>
+            <_PkgOutput>$(PublishDir)$(AssemblyName).pkg</_PkgOutput>
+        </PropertyGroup>
+        <RemoveDir Directories="$(_PkgPayload)"/>
+        <MakeDir Directories="$(_PkgPayload)"/>
+        <Exec Command="ditto &quot;$(PublishDir)$(AssemblyName).app&quot; &quot;$(_PkgPayload)/$(AssemblyName).app&quot;"/>
+        <Exec Command="pkgbuild --root &quot;$(_PkgPayload)&quot; --identifier &quot;$(PackageId)&quot; --version &quot;$(Version)&quot; --install-location /Applications &quot;$(_PkgOutput)&quot;"/>
+        <RemoveDir Directories="$(_PkgPayload)"/>
+        <Message Importance="high" Text="PKG installer: $(_PkgOutput)"/>
+    </Target>
+
+    <Target Name="CleanMacOSPublishDir" AfterTargets="CreateMacOSPkg" Condition="$(RuntimeIdentifier.StartsWith('osx'))">
+        <ItemGroup>
+            <_PublishExtras Include="$(PublishDir)*" Exclude="$(PublishDir)$(AssemblyName).app/**;$(PublishDir)$(AssemblyName).app;$(PublishDir)$(AssemblyName).pkg"/>
+        </ItemGroup>
+        <Delete Files="@(_PublishExtras)"/>
+        <RemoveDir Directories="$(PublishDir)$(AssemblyName).dSYM"/>
+    </Target>
 
 </Project>

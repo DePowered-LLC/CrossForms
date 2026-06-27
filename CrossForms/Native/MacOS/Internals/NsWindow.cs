@@ -1,11 +1,12 @@
 using System.Runtime.InteropServices;
+
 using CrossForms.Native.Common;
 
 namespace CrossForms.Native.MacOS.Internals;
 
-public class NsWindow: NsEventDispatcher {
-	[DllImport(ObjC.COCOA, EntryPoint = "objc_msgSend")]
-	private static extern IntPtr SendMessage (IntPtr cls, IntPtr selector, CGRect frame, long styleMask, long backing, int defer);
+
+public partial class NsWindow: NsEventDispatcher {
+	public delegate void WindowWillCloseFn (IntPtr self, IntPtr sel, IntPtr notification);
 
 	[Flags]
 	public enum StyleMask: long {
@@ -16,68 +17,67 @@ public class NsWindow: NsEventDispatcher {
 		Resizable = 8L
 	}
 
-	private static readonly ObjClass proto = ObjClass.Get("NSWindow");
+	private static readonly ObjClass Proto = ObjClass.Get("NSWindow");
+
+	private static readonly IntPtr InitContentFrameSel = ObjSelector.Get("initWithContentRect:styleMask:backing:defer:");
+	private static readonly IntPtr MakeKeyAndOrderFrontSel = ObjSelector.Get("makeKeyAndOrderFront:");
+
+	private static readonly IntPtr GetTitleSel = ObjSelector.Get("title");
+	private static readonly IntPtr SetTitleSel = ObjSelector.Get("setTitle:");
+
+	private static readonly IntPtr FrameSel = ObjSelector.Get("frame");
+
+	private static readonly IntPtr SetFrameOriginSel = ObjSelector.Get("setFrameOrigin:");
+
+	private static readonly IntPtr SetInitialFirstResponderSel = ObjSelector.Get("setInitialFirstResponder:");
 
 	internal NsWindow () {}
 
-	private static readonly IntPtr INIT_CONTENT_FRAME = ObjSelector.Get("initWithContentRect:styleMask:backing:defer:");
-	private static readonly IntPtr MAKE_KEY_AND_ORDER_FRONT = ObjSelector.Get("makeKeyAndOrderFront:");
-	public NsWindow (CGRect frame, StyleMask style, long backingStore, bool defer = false) {
-		proto.Construct(this);
-		SendMessage(inner, INIT_CONTENT_FRAME, frame, (long) style, backingStore, defer ? 1 : 0);
-		ObjC.SendMessage(inner, MAKE_KEY_AND_ORDER_FRONT, IntPtr.Zero);
+	public NsWindow (CgRect frame, StyleMask style, long backingStore, bool defer = false) {
+		Proto.Construct(this);
+		SendMessage(inner, InitContentFrameSel, frame, (long) style, backingStore, defer ? 1 : 0);
+		ObjC.SendMessage(inner, MakeKeyAndOrderFrontSel, IntPtr.Zero);
 	}
 
-	private static readonly IntPtr GET_TITLE = ObjSelector.Get("title");
-	private static readonly IntPtr SET_TITLE = ObjSelector.Get("setTitle:");
 	public string Title {
-		get { return new NsString(ObjC.SendMessage(inner, GET_TITLE)).Value; }
-		set { ObjC.SendMessage(inner, SET_TITLE, new NsString(value).inner); }
+		get => new NsString(ObjC.SendMessage(inner, GetTitleSel)).Value;
+		set => ObjC.SendMessage(inner, SetTitleSel, new NsString(value).inner);
 	}
 
-	[DllImport(ObjC.COCOA, EntryPoint = "objc_msgSend")]
-	private static extern IntPtr SendMessage (IntPtr cls, IntPtr selector, CGPoint position);
+	public CgRect Frame => ObjC.SendMessage<CgRect>(inner, FrameSel);
 
-	[DllImport(ObjC.COCOA, EntryPoint = "objc_msgSend")]
-	private static extern IntPtr SendMessage (IntPtr cls, IntPtr selector, CGSize size);
+	public NsView ContentView => new() { inner = ObjC.SendMessage(inner, "contentView") };
 
-	private static readonly IntPtr FRAME = ObjSelector.Get("frame");
-	public CGRect Frame => ObjC.SendMessage<CGRect>(inner, FRAME);
+	[LibraryImport(ObjC.CocoaPath, EntryPoint = "objc_msgSend")]
+	private static partial IntPtr SendMessage (
+		IntPtr cls, IntPtr selector, CgRect frame, long styleMask, long backing,
+		int defer
+	);
 
-	private static readonly IntPtr SET_FRAME_ORIGIN = ObjSelector.Get("setFrameOrigin:");
+	[LibraryImport(ObjC.CocoaPath, EntryPoint = "objc_msgSend")]
+	private static partial IntPtr SendMessage (IntPtr cls, IntPtr selector, CgPoint position);
+
+	[LibraryImport(ObjC.CocoaPath, EntryPoint = "objc_msgSend")]
+	private static partial IntPtr SendMessage (IntPtr cls, IntPtr selector, CgSize size);
+
 	public void SetFrameOrigin (double x, double y) {
-		SendMessage(inner, SET_FRAME_ORIGIN, new CGPoint { x = x, y = y });
-	}
-	public void SetFrameOrigin (CGPoint point) {
-		SendMessage(inner, SET_FRAME_ORIGIN, point);
+		SendMessage(inner, SetFrameOriginSel, new CgPoint { x = x, y = y });
 	}
 
-	private static readonly IntPtr SET_INITIAL_FIRST_RESPONDER = ObjSelector.Get("setInitialFirstResponder:");
+	public void SetFrameOrigin (CgPoint point) {
+		SendMessage(inner, SetFrameOriginSel, point);
+	}
+
 	public void SetInitialFirstResponder (NsView view) {
-		ObjC.SendMessage(inner, SET_INITIAL_FIRST_RESPONDER, view.inner);
+		ObjC.SendMessage(inner, SetInitialFirstResponderSel, view.inner);
 	}
 
-	public NsView ContentView => new NsView { inner = ObjC.SendMessage(inner, "contentView") };
 	public void Append (NsControl child) {
 		child.parent = this;
 		ContentView.AddSubview(child);
 		child.OnAttach();
 	}
 
-	class Del: NativeManaged<IntPtr> {
-		public static ObjClass proto;
-		static Del () {
-			proto = NsObject.proto.NewSubClass("NSWindowDelegate");
-			// class_addProtocol(myWindowDelegateClass, @protocol(NSWindowDelegate));
-			proto.AddMethod("windowWillClose:", (WindowWillCloseFn) ((_, _, _) => Console.WriteLine("Smth!")), "v@:@");
-		}
-
-		public Del () {
-			proto.Construct(this);
-		}
-	}
-
-	public delegate void WindowWillCloseFn (IntPtr self, IntPtr sel, IntPtr notification);
 	public void OnClose (Action handle) {
 		// var cls = NSObject.proto.NewSubClass("NSWindowDelegate", cls => {
 		// 	cls.AddMethod("windowWillClose:", (WindowWillCloseFn) ((_, _, _) => Console.WriteLine("Smth!")), "v@:@");
@@ -92,5 +92,19 @@ public class NsWindow: NsEventDispatcher {
 		// dispatcherClass.AddMethod("windowWillClose:", handle, "v@:@");
 		ObjC.SendMessage(inner, ObjSelector.Get("setDelegate:"), dispatcherInstance);
 		// ObjC.SendMessage(inner, ObjSelector.Get("setDelegate:"), del.inner);
+	}
+
+	private class Del: NativeManaged<IntPtr> {
+		public static readonly ObjClass Proto;
+
+		static Del () {
+			Proto = NsObject.Proto.NewSubClass("NSWindowDelegate");
+			// class_addProtocol(myWindowDelegateClass, @protocol(NSWindowDelegate));
+			Proto.AddMethod("windowWillClose:", (WindowWillCloseFn) ((_, _, _) => Console.WriteLine("Smth!")), "v@:@");
+		}
+
+		public Del () {
+			Proto.Construct(this);
+		}
 	}
 }

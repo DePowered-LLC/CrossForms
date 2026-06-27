@@ -1,10 +1,12 @@
 using System.Runtime.InteropServices;
-using static CrossForms.Native.Win32.Internals;
+
+using static CrossForms.Native.Win32.Internals.Internals;
 
 namespace CrossForms.Native.Win32;
 
+
 public class Win32Exception: NativeException {
-	public Win32Exception (string message) : base(message) {}
+	public Win32Exception (string message): base(message) {}
 
 	protected override string PrepareMessage (string message) {
 		var errCode = (uint) Marshal.GetLastWin32Error();
@@ -13,8 +15,8 @@ public class Win32Exception: NativeException {
 			FormatMessageFlag.AllocateBuffer | FormatMessageFlag.FromSystem | FormatMessageFlag.IgnoreInserts,
 			IntPtr.Zero,
 			errCode,
-			0 | 1 << 10, // Current user language (neutral, default)
-			out string formatted,
+			0 | (1 << 10), // Current user language (neutral, default)
+			out var formatted,
 			0
 		);
 

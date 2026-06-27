@@ -1,44 +1,16 @@
 using CrossForms.Native.Common;
-using static CrossForms.Native.Win32.Internals;
+using CrossForms.Native.Win32.Internals;
+
+using static CrossForms.Native.Win32.Internals.Internals;
 
 namespace CrossForms.Native.Win32;
-public abstract class Control: IControl<Control> {
-	public Control? parent { get; set; }
-	public List<Control>? children { get; set; }
 
+
+public abstract class Control: IControl<Control> {
 	protected IntPtr handle;
 	protected bool IsLoaded => handle != IntPtr.Zero;
-
-	protected abstract ControlCreationOptions GetCreationOptions ();
-	protected virtual void Load () {
-		var options = GetCreationOptions();
-		var parentInstPtr = parent != null
-			? GetWindowLongPtr(parent.handle, GWL.HINSTANCE)
-			: GetModuleHandle();
-
-		handle = CreateWindowEx(
-			options.styleEx,
-			options.className,
-			options.label,
-			options.style,
-			options.x,
-			options.y,
-			(int) options.width,
-			(int) options.height,
-			parent?.handle ?? IntPtr.Zero,
-			IntPtr.Zero,
-			parentInstPtr,
-			IntPtr.Zero
-		);
-
-		if (handle == IntPtr.Zero) {
-			throw new Win32Exception("Cannot create control");
-		}
-	}
-
-	protected virtual void UnLoad () {
-		DestroyWindow(handle);
-	}
+	public Control? parent { get; set; }
+	public List<Control>? children { get; set; }
 
 	public void Append (Control child) {
 		if (children == null) return;
@@ -64,7 +36,39 @@ public abstract class Control: IControl<Control> {
 
 		if (IsLoaded) UnLoad();
 		parent = null;
-		foreach (var child in children) child.Destroy();
+		foreach (var child in children) {
+			child.Destroy();
+		}
+	}
+
+	protected abstract ControlCreationOptions GetCreationOptions ();
+
+	protected virtual void Load () {
+		var options = GetCreationOptions();
+		var parentInstPtr = parent != null
+			? GetWindowLongPtr(parent.handle, GWL.HINSTANCE)
+			: GetModuleHandle();
+
+		handle = CreateWindowEx(
+			options.styleEx,
+			options.className,
+			options.label,
+			options.style,
+			options.x,
+			options.y,
+			(int) options.width,
+			(int) options.height,
+			parent?.handle ?? IntPtr.Zero,
+			IntPtr.Zero,
+			parentInstPtr,
+			IntPtr.Zero
+		);
+
+		if (handle == IntPtr.Zero) throw new Win32Exception("Cannot create control");
+	}
+
+	protected virtual void UnLoad () {
+		DestroyWindow(handle);
 	}
 
 	internal Control? GetChild (IntPtr handle) {
@@ -76,7 +80,9 @@ public abstract class Control: IControl<Control> {
 		return null;
 	}
 
-	internal virtual IntPtr DispatchEvent (ushort command) => (IntPtr) (-1);
+	internal virtual IntPtr DispatchEvent (ushort command) {
+		return -1;
+	}
 }
 
 public struct ControlCreationOptions {
