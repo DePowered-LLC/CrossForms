@@ -11,6 +11,10 @@ public class NativeForm: Control, IForm {
 	private NativeButton? _initialControl;
 	private WindowClassEx _windowClass;
 
+	public NativeForm () {
+		Children = [];
+	}
+
 	public required string Id { get; set; }
 	public required string Title { get; set; }
 	public ushort Width { get; set; } = 420;
@@ -23,6 +27,20 @@ public class NativeForm: Control, IForm {
 	public void Show () {
 		if (!IsLoaded) Load();
 		ShowWindow(handle, ShowWindowCommand.ShowNormal);
+	}
+
+	public void Append (NativeRadioGroup group) {
+		foreach (var item in group.Items) {
+			Append((NativeRadioButton) item);
+		}
+		
+		if (group.SelectedIndex >= 0 && group.SelectedIndex < group.Items.Length) {
+			((NativeRadioButton) group.Items[group.SelectedIndex]).Checked = true;
+		}
+	}
+
+	public void Append (NativeRadioButton radioButton) {
+		Append((Control) radioButton);
 	}
 
 	protected override ControlCreationOptions GetCreationOptions () {

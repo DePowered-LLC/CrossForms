@@ -9,6 +9,8 @@ public class NativeForm: IForm {
 	private readonly List<NativeLabel> _labelChildren = [];
 	private readonly List<NativeTextBox> _textBoxChildren = [];
 	private readonly List<NativeCheckBox> _checkBoxChildren = [];
+	private readonly List<NativeRadioButton> _radioButtonChildren = [];
+	private readonly HashSet<NativeRadioGroup> _radioGroups = [];
 	private NativeButton? _initialControl;
 
 	private NsWindow? _window;
@@ -53,6 +55,14 @@ public class NativeForm: IForm {
 			AttachCheckBox(checkBox);
 		}
 
+		foreach (var radioButton in _radioButtonChildren) {
+			AttachRadioButton(radioButton);
+		}
+
+		foreach (var group in _radioGroups) {
+			ApplyRadioGroupInitialSelection(group);
+		}
+
 		foreach (var btn in _children) {
 			if (btn.nextControl?.nsButton != null) {
 				btn.nsButton!.SetNextKeyView(btn.nextControl.nsButton);
@@ -63,6 +73,19 @@ public class NativeForm: IForm {
 		if (first?.nsButton != null) {
 			_window.SetInitialFirstResponder(first.nsButton);
 		}
+	}
+
+	public void Append (NativeRadioGroup group) {
+		_radioGroups.Add(group);
+		foreach (var item in group.Items)
+			Append((NativeRadioButton) item);
+		if (_window != null) ApplyRadioGroupInitialSelection(group);
+	}
+
+	public void Append (NativeRadioButton radioButton) {
+		if (radioButton.group != null) _radioGroups.Add(radioButton.group);
+		_radioButtonChildren.Add(radioButton);
+		if (_window != null) AttachRadioButton(radioButton);
 	}
 
 	public void Append (NativeCheckBox checkBox) {
@@ -89,6 +112,44 @@ public class NativeForm: IForm {
 		if (_window != null) {
 			AttachButton(button);
 		}
+	}
+
+	private void AttachRadioButton (NativeRadioButton radioButton) {
+		var nsRb = radioButton.CreateNsRadioButton();
+		radioButton.nsRadioButton = nsRb;
+
+		var group = radioButton.group;
+		if (group != null) {
+			var index = Array.IndexOf(group.Items, radioButton);
+			nsRb.OnClick(() => {
+				foreach (var item in group.Items) {
+					var sibling = (NativeRadioButton) item;
+					sibling.nsRadioButton?.State = false;
+				}
+				
+				nsRb.State = true;
+				group.NotifyChange(index);
+			});
+		}
+
+		_window!.Append(nsRb);
+
+		var contentView = _window.ContentView;
+		var rw = radioButton.Width > 0 ? (double) radioButton.Width : 120;
+		var rh = radioButton.Height > 0 ? (double) radioButton.Height : 22;
+
+		nsRb.LeadingAnchor.ConstraintToAnchor(contentView.LeadingAnchor, radioButton.X).Active = true;
+		nsRb.TopAnchor.ConstraintToAnchor(contentView.TopAnchor, radioButton.Y).Active = true;
+		nsRb.WidthAnchor.ConstraintToConstant(rw).Active = true;
+		nsRb.HeightAnchor.ConstraintToConstant(rh).Active = true;
+	}
+
+	private void ApplyRadioGroupInitialSelection (NativeRadioGroup group) {
+		var idx = group.SelectedIndex;
+		if (idx < 0 || idx >= group.Items.Length) return;
+		
+		var rb = (NativeRadioButton) group.Items[idx];
+		rb.nsRadioButton?.State = true;
 	}
 
 	private void AttachCheckBox (NativeCheckBox checkBox) {

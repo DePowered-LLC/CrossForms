@@ -56,6 +56,16 @@ try {
 	};
 	Application.MainWindow.Append(checkBox1);
 
+	var rb1 = new RadioButton("Option A") { X = 10, Y = 162, Width = 200 };
+	var rb2 = new RadioButton("Option B") { X = 10, Y = 186, Width = 200 };
+	var rb3 = new RadioButton("Option C") { X = 10, Y = 210, Width = 200 };
+	
+	var radioGroup = new RadioGroup(rb1, rb2, rb3) { SelectedIndex = 0 };
+	radioGroup.OnChange += (_, e) => {
+		Console.WriteLine($"Radio selected: {e.selectedIndex}");
+	};
+	Application.MainWindow.Append(radioGroup);
+
 	Application.MainWindow.Show();
 	Application.Run();
 } catch (NativeException err) {
