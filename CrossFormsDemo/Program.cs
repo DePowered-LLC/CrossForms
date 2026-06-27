@@ -43,6 +43,18 @@ try {
 	testBtn2.SetNextControl(testBtn1);
 	Application.MainWindow.Append(testBtn2);
 	Application.MainWindow.SetInitialControl(testBtn2);
+	
+	var checkBox1 = new CheckBox("Enable input above") {
+		X = 10,
+		Y = 130,
+		Width = 200,
+		Height = 22,
+		Checked = true
+	};
+	checkBox1.OnChange += (_, _) => {
+		input1.Enabled = checkBox1.Checked;
+	};
+	Application.MainWindow.Append(checkBox1);
 
 	Application.MainWindow.Show();
 	Application.Run();

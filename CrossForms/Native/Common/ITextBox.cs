@@ -1,7 +1,7 @@
 namespace CrossForms.Native.Common;
 
 
-public interface ITextBox {
+public interface ITextBox: IEnabled {
 	string Text { get; set; }
 	int X { get; }
 	int Y { get; }

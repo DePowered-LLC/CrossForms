@@ -8,13 +8,22 @@ public class NativeTextBox: ITextBox {
 	internal NsTextInput? nsTextInput;
 
 	private string _text = "";
+	private bool _enabled = true;
 	private EventHandler<ChangeEvent>? _onChange;
 
 	public string Text {
 		get => nsTextInput?.StringValue ?? _text;
 		set {
 			_text = value;
-			if (nsTextInput != null) nsTextInput.StringValue = value;
+			nsTextInput?.StringValue = value;
+		}
+	}
+
+	public bool Enabled {
+		get => nsTextInput?.Enabled ?? _enabled;
+		set {
+			_enabled = value;
+			nsTextInput?.Enabled = value;
 		}
 	}
 
@@ -30,6 +39,7 @@ public class NativeTextBox: ITextBox {
 
 	internal NsTextInput CreateNsTextInput () {
 		var tf = new NsTextInput(_text);
+		if (!_enabled) tf.Enabled = false;
 		tf.OnChange(() => _onChange?.Invoke(this, new ChangeEvent { Text = tf.StringValue }));
 		return tf;
 	}

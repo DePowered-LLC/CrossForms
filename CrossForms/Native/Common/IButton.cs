@@ -1,7 +1,7 @@
 namespace CrossForms.Native.Common;
 
 
-public interface IButton {
+public interface IButton: IEnabled {
 	string Text { get; }
 	int X { get; }
 	int Y { get; }

@@ -8,6 +8,7 @@ public class NativeForm: IForm {
 	private readonly List<NativeButton> _children = [];
 	private readonly List<NativeLabel> _labelChildren = [];
 	private readonly List<NativeTextBox> _textBoxChildren = [];
+	private readonly List<NativeCheckBox> _checkBoxChildren = [];
 	private NativeButton? _initialControl;
 
 	private NsWindow? _window;
@@ -48,6 +49,10 @@ public class NativeForm: IForm {
 			AttachTextBox(textBox);
 		}
 
+		foreach (var checkBox in _checkBoxChildren) {
+			AttachCheckBox(checkBox);
+		}
+
 		foreach (var btn in _children) {
 			if (btn.nextControl?.nsButton != null) {
 				btn.nsButton!.SetNextKeyView(btn.nextControl.nsButton);
@@ -58,6 +63,11 @@ public class NativeForm: IForm {
 		if (first?.nsButton != null) {
 			_window.SetInitialFirstResponder(first.nsButton);
 		}
+	}
+
+	public void Append (NativeCheckBox checkBox) {
+		_checkBoxChildren.Add(checkBox);
+		if (_window != null) AttachCheckBox(checkBox);
 	}
 
 	public void Append (NativeTextBox textBox) {
@@ -79,6 +89,21 @@ public class NativeForm: IForm {
 		if (_window != null) {
 			AttachButton(button);
 		}
+	}
+
+	private void AttachCheckBox (NativeCheckBox checkBox) {
+		var nsCb = checkBox.CreateNsCheckBox();
+		checkBox.nsCheckBox = nsCb;
+		_window!.Append(nsCb);
+
+		var contentView = _window.ContentView;
+		var cw = checkBox.Width > 0 ? (double) checkBox.Width : 120;
+		var ch = checkBox.Height > 0 ? (double) checkBox.Height : 22;
+
+		nsCb.LeadingAnchor.ConstraintToAnchor(contentView.LeadingAnchor, checkBox.X).Active = true;
+		nsCb.TopAnchor.ConstraintToAnchor(contentView.TopAnchor, checkBox.Y).Active = true;
+		nsCb.WidthAnchor.ConstraintToConstant(cw).Active = true;
+		nsCb.HeightAnchor.ConstraintToConstant(ch).Active = true;
 	}
 
 	private void AttachTextBox (NativeTextBox textBox) {

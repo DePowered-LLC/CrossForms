@@ -2,6 +2,14 @@ namespace CrossForms.Native.MacOS.Internals;
 
 
 public class NsControl: NsView {
+	private static readonly IntPtr GetEnabledSel = ObjSelector.Get("isEnabled");
+	private static readonly IntPtr SetEnabledSel = ObjSelector.Get("setEnabled:");
+
+	public bool Enabled {
+		get => ObjC.SendMessage(inner, GetEnabledSel) != IntPtr.Zero;
+		set => ObjC.SendMessage(inner, SetEnabledSel, value ? 1 : 0);
+	}
+
 	private Dictionary<string, PreRegisteredEvent>? _preRegisteredEvents = new();
 
 	public NsEventDispatcher GetEventDispatcher () {

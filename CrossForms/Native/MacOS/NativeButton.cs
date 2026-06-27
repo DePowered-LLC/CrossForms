@@ -9,8 +9,18 @@ public class NativeButton: IButton {
 
 	internal NsButton? nsButton;
 
+	private bool _enabled = true;
 	private EventHandler<ClickEvent>? _onClick;
+
 	public string Text { get; set; } = "";
+
+	public bool Enabled {
+		get => nsButton?.Enabled ?? _enabled;
+		set {
+			_enabled = value;
+			if (nsButton != null) nsButton.Enabled = value;
+		}
+	}
 	public int X { get; set; }
 	public int Y { get; set; }
 	public ushort Width { get; set; } = 120;
@@ -29,6 +39,7 @@ public class NativeButton: IButton {
 
 	internal NsButton CreateNsButton () {
 		var btn = new NsButton(Text);
+		if (!_enabled) btn.Enabled = false;
 		btn.OnClick(() => {
 			var clickPos = new ClickEvent();
 			var ev = NsApplication.Current.CurrentEvent;

@@ -3,8 +3,15 @@ using CrossForms.Native.Common;
 namespace CrossForms.Native.Stub;
 
 
-public class NativeTextBox: ITextBox {
-	public string Text {
+public class NativeCheckBox: ICheckBox {
+	public string Text => throw new NotImplementedException();
+
+	public bool Enabled {
+		get => throw new NotImplementedException();
+		set => throw new NotImplementedException();
+	}
+
+	public bool Checked {
 		get => throw new NotImplementedException();
 		set => throw new NotImplementedException();
 	}
@@ -14,12 +21,7 @@ public class NativeTextBox: ITextBox {
 	public ushort Width => throw new NotImplementedException();
 	public ushort Height => throw new NotImplementedException();
 
-	public bool Enabled {
-		get => throw new NotImplementedException();
-		set => throw new NotImplementedException();
-	}
-
-	public EventHandler<ChangeEvent> OnChange {
+	public EventHandler<CheckEvent> OnChange {
 		get => throw new NotImplementedException();
 		set => throw new NotImplementedException();
 	}

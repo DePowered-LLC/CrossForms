@@ -6,11 +6,20 @@ using static CrossForms.Native.Win32.Internals.Internals;
 namespace CrossForms.Native.Win32;
 
 
-public abstract class Control: IControl<Control> {
+public abstract class Control: IControl<Control>, IEnabled {
 	protected IntPtr handle;
 	protected bool IsLoaded => handle != IntPtr.Zero;
 	public Control? Parent { get; set; }
 	public List<Control>? Children { get; set; }
+
+	private bool _enabled = true;
+	public bool Enabled {
+		get => _enabled;
+		set {
+			_enabled = value;
+			if (IsLoaded) EnableWindow(handle, value);
+		}
+	}
 
 	public void Append (Control child) {
 		if (Children == null) return;
@@ -64,6 +73,7 @@ public abstract class Control: IControl<Control> {
 		);
 
 		if (handle == IntPtr.Zero) throw new Win32Exception("Cannot create control");
+		if (!_enabled) EnableWindow(handle, false);
 	}
 
 	protected virtual void UnLoad () {

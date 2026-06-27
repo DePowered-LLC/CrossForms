@@ -60,6 +60,15 @@ internal partial class Internals {
 	[DllImport("user32.dll", CharSet = CharSet.Auto)]
 	public static extern bool SetWindowText (IntPtr hWnd, string lpString);
 
+	[DllImport("user32.dll")]
+	public static extern bool EnableWindow (IntPtr hWnd, bool bEnable);
+
+	[DllImport("user32.dll")]
+	public static extern IntPtr SendMessage (IntPtr hWnd, uint msg, int wParam, int lParam);
+
+	[DllImport("user32.dll")]
+	public static extern IntPtr SendMessage (IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
 	public static string GetWindowText (IntPtr hWnd) {
 		var sb = new System.Text.StringBuilder(256);
 		GetWindowText(hWnd, sb, sb.Capacity);
