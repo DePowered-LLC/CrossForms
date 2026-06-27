@@ -15,10 +15,16 @@ try {
 		Console.WriteLine($"Button 1 click at ({e.x}; {e.y})");
 	};
 	Application.MainWindow.Append(testBtn1);
+	
+	var label1 = new Label("Пример текста\n123-321") {
+		X = 10,
+		Y = 36
+	};
+	Application.MainWindow.Append(label1);
 
 	var testBtn2 = new Button("Ещё кнопка") {
 		X = 10,
-		Y = 35,
+		Y = 58,
 		Width = 100,
 		Height = 22
 	};

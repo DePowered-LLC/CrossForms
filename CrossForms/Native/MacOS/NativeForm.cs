@@ -6,6 +6,7 @@ namespace CrossForms.Native.MacOS;
 
 public class NativeForm: IForm {
 	private readonly List<NativeButton> _children = [];
+	private readonly List<NativeLabel> _labelChildren = [];
 	private NativeButton? _initialControl;
 
 	private NsWindow? _window;
@@ -38,6 +39,10 @@ public class NativeForm: IForm {
 			AttachButton(child);
 		}
 
+		foreach (var label in _labelChildren) {
+			AttachLabel(label);
+		}
+
 		foreach (var btn in _children) {
 			if (btn.nextControl?.nsButton != null) {
 				btn.nsButton!.SetNextKeyView(btn.nextControl.nsButton);
@@ -50,6 +55,11 @@ public class NativeForm: IForm {
 		}
 	}
 
+	public void Append (NativeLabel label) {
+		_labelChildren.Add(label);
+		if (_window != null) AttachLabel(label);
+	}
+
 	public void Append (NativeButton button) {
 		if (_children.Count > 0 && _children[^1].nextControl == null) {
 			_children[^1].nextControl = button;
@@ -59,6 +69,21 @@ public class NativeForm: IForm {
 		if (_window != null) {
 			AttachButton(button);
 		}
+	}
+
+	private void AttachLabel (NativeLabel label) {
+		var nsTf = label.CreateNsTextField();
+		label.nsTextField = nsTf;
+		_window!.ContentView.AddSubview(nsTf);
+
+		var contentView = _window.ContentView;
+		var lw = label.Width > 0 ? (double) label.Width : 120;
+		var lh = label.Height > 0 ? (double) label.Height : 17;
+
+		nsTf.LeadingAnchor.ConstraintToAnchor(contentView.LeadingAnchor, label.X).Active = true;
+		nsTf.TopAnchor.ConstraintToAnchor(contentView.TopAnchor, label.Y).Active = true;
+		nsTf.WidthAnchor.ConstraintToConstant(lw).Active = true;
+		nsTf.HeightAnchor.ConstraintToConstant(lh).Active = true;
 	}
 
 	private void AttachButton (NativeButton button) {
