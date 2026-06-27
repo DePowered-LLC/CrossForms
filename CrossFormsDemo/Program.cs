@@ -18,18 +18,27 @@ try {
 	
 	var label1 = new Label("Пример текста\n123-321") {
 		X = 10,
-		Y = 36
+		Y = 36,
+		Height = 40
 	};
 	Application.MainWindow.Append(label1);
 
-	var testBtn2 = new Button("Ещё кнопка") {
+	var input1 = new TextBox("default") {
 		X = 10,
-		Y = 58,
-		Width = 100,
+		Y = 100,
+		Width = 200,
 		Height = 22
 	};
-	testBtn2.OnClick += (_, e) => {
-		Console.WriteLine($"Button 2 click at ({e.x}; {e.y})");
+	Application.MainWindow.Append(input1);
+
+	var testBtn2 = new Button("Read input below") {
+		X = 10,
+		Y = 72,
+		Width = 200,
+		Height = 22
+	};
+	testBtn2.OnClick += (_, _) => {
+		Console.WriteLine($"Input value: {input1.Text}");
 	};
 	testBtn2.SetNextControl(testBtn1);
 	Application.MainWindow.Append(testBtn2);

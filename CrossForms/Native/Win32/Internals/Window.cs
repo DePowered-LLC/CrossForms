@@ -54,6 +54,18 @@ internal partial class Internals {
 	[DllImport("user32.dll")]
 	public static extern bool GetCursorPos (out NativePoint pos);
 
+	[DllImport("user32.dll", CharSet = CharSet.Auto)]
+	private static extern int GetWindowText (IntPtr hWnd, System.Text.StringBuilder lpString, int nMaxCount);
+
+	[DllImport("user32.dll", CharSet = CharSet.Auto)]
+	public static extern bool SetWindowText (IntPtr hWnd, string lpString);
+
+	public static string GetWindowText (IntPtr hWnd) {
+		var sb = new System.Text.StringBuilder(256);
+		GetWindowText(hWnd, sb, sb.Capacity);
+		return sb.ToString();
+	}
+
 	[StructLayout(LayoutKind.Sequential)]
 	public struct WindowClassEx {
 		public uint cbSize;
