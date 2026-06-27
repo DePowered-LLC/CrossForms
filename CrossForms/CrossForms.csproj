@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <DefineConstants>IS_$(NETCoreSdkRuntimeIdentifier.Replace('-', '_').ToUpper())</DefineConstants>
+    <Company>DePowered</Company>
+    <StripSymbols>true</StripSymbols>
+  </PropertyGroup>
+
+
+</Project>
