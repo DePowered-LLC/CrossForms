@@ -9,12 +9,12 @@ namespace CrossForms.Native.Win32;
 
 public class NativeForm: Control, IForm {
 	private NativeButton? _initialControl;
-	private WindowClassEx windowClass;
+	private WindowClassEx _windowClass;
 
-	public required string id { get; set; }
-	public required string title { get; set; }
-	public ushort width { get; set; } = 420;
-	public ushort height { get; set; } = 380;
+	public required string Id { get; set; }
+	public required string Title { get; set; }
+	public ushort Width { get; set; } = 420;
+	public ushort Height { get; set; } = 380;
 
 	public void SetInitialControl (IButton button) {
 		_initialControl = (NativeButton) button;
@@ -26,16 +26,16 @@ public class NativeForm: Control, IForm {
 	}
 
 	protected override ControlCreationOptions GetCreationOptions () {
-		windowClass = WindowClassEx.CreateDefault(id, OnWindowMessage);
-		if (!windowClass.Register()) throw new Win32Exception($"Cannot register \"{id}\" window class");
+		_windowClass = WindowClassEx.CreateDefault(Id, OnWindowMessage);
+		if (!_windowClass.Register()) throw new Win32Exception($"Cannot register \"{Id}\" window class");
 
 		return new ControlCreationOptions {
-			className = id,
-			label = title,
+			className = Id,
+			label = Title,
 			style = WindowStyle.OverlapperWindow,
 			styleEx = WindowStyleEx.Overlapped,
-			width = width,
-			height = height
+			width = Width,
+			height = Height
 		};
 	}
 
@@ -65,10 +65,10 @@ public class NativeForm: Control, IForm {
 	}
 
 	protected override void UnLoad () {
-		windowClass.UnRegister();
+		_windowClass.UnRegister();
 
-		if (Application.mainWindow != null)
-			if ((IForm) this == Application.mainWindow)
-				PostQuitMessage(0);
+		if (Application.MainWindow == null) return;
+		if ((IForm) this == Application.MainWindow)
+			PostQuitMessage(0);
 	}
 }

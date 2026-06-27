@@ -2,16 +2,16 @@ namespace CrossForms.Components;
 
 
 public class Application {
-	public static Form? mainWindow;
+	public static Form? MainWindow;
 
 	public static void Start () {
-		NativeApplication.Start();
+		NativeApplicationBase.Start();
 	}
 
 	public static void Run () {
-		while (NativeApplication.EventLoop()) ;
+		while (NativeApplicationBase.EventLoop()) ;
 
-		NativeApplication.Dispose();
+		NativeApplicationBase.Dispose();
 		Console.WriteLine("Event loop exited");
 	}
 }

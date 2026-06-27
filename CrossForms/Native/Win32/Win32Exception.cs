@@ -5,9 +5,7 @@ using static CrossForms.Native.Win32.Internals.Internals;
 namespace CrossForms.Native.Win32;
 
 
-public class Win32Exception: NativeException {
-	public Win32Exception (string message): base(message) {}
-
+public class Win32Exception (string message): NativeException(message) {
 	protected override string PrepareMessage (string message) {
 		var errCode = (uint) Marshal.GetLastWin32Error();
 

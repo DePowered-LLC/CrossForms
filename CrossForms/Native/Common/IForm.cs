@@ -2,10 +2,10 @@ namespace CrossForms.Native.Common;
 
 
 public interface IForm {
-	string id { get; }
-	string title { get; }
-	ushort width { get; }
-	ushort height { get; }
+	string Id { get; }
+	string Title { get; }
+	ushort Width { get; }
+	ushort Height { get; }
 
 	void Show ();
 	void SetInitialControl (IButton button);

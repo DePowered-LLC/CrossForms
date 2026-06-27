@@ -172,7 +172,7 @@ public enum WindowStyleEx: uint {
 	///     Specifies a window with the horizontal origin on the right edge. Increasing horizontal values advance to the left.
 	///     The shell language must support reading-order alignment for this to take effect.
 	/// </summary>
-	LayoutRTL = 0x00400000,
+	LayoutRtl = 0x00400000,
 
 	/// <summary>Specifies a window that has generic left-aligned properties. This is the default.</summary>
 	Left = 0x00000000,
@@ -186,12 +186,12 @@ public enum WindowStyleEx: uint {
 	/// <summary>
 	///     Specifies a window that displays text using left-to-right reading-order properties. This is the default.
 	/// </summary>
-	LTR_Reading = 0x00000000,
+	LtrReading = 0x00000000,
 
 	/// <summary>
 	///     Specifies a multiple-document interface (MDI) child window.
 	/// </summary>
-	MDI_Child = 0x00000040,
+	MdiChild = 0x00000040,
 
 	/// <summary>
 	///     Specifies a top-level window created with this style does not become the foreground window when the user clicks it.
@@ -244,7 +244,7 @@ public enum WindowStyleEx: uint {
 	///     Specifies a window that displays text using right-to-left reading-order properties.
 	///     The shell language must support reading-order alignment for this to take effect.
 	/// </summary>
-	RTL_Reading = 0x00002000,
+	RtlReading = 0x00002000,
 
 	/// <summary>
 	///     Specifies a window with a three-dimensional border style intended to be used for items that do not accept user
@@ -342,12 +342,12 @@ public enum ShowWindowCommand {
 }
 
 [Flags]
-public enum GWL {
-	WNDPROC = -4,
-	HINSTANCE = -6,
-	HWNDPARENT = -8,
-	STYLE = -16,
-	EXSTYLE = -20,
-	USERDATA = -21,
-	ID = -12
+public enum Gwl {
+	WndProc = -4,
+	HInstance = -6,
+	HwndParent = -8,
+	Style = -16,
+	ExStyle = -20,
+	UserData = -21,
+	Id = -12
 }

@@ -1,7 +1,7 @@
 namespace CrossForms.Native.Common;
 
 
-public abstract class IApplication {
+public abstract class ApplicationBase {
 	public static void Start () {
 		throw new NotImplementedException();
 	}

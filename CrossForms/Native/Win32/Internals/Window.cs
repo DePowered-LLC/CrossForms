@@ -40,7 +40,7 @@ internal partial class Internals {
 	public static extern bool ShowWindow (IntPtr handle, ShowWindowCommand command);
 
 	[DllImport("user32.dll")]
-	public static extern IntPtr GetWindowLongPtr (IntPtr handle, GWL index);
+	public static extern IntPtr GetWindowLongPtr (IntPtr handle, Gwl index);
 
 	[DllImport("user32.dll")]
 	public static extern IntPtr SetParent (IntPtr child, IntPtr parent);

@@ -113,15 +113,15 @@ public class NativeFn {
 		MakeDelegate = (DelegateCreator) Delegate.CreateDelegate(typeof(DelegateCreator), creatorMethod!);
 	}
 
-	public static R? Apply<R> (IntPtr fnPtr, List<Type> types, List<object> values, NativeArg[] args) {
+	public static TR? Apply<TR> (IntPtr fnPtr, List<Type> types, List<object> values, NativeArg[] args) {
 		foreach (var arg in args) {
 			types.Add(arg.type);
 			values.Add(arg.value);
 		}
 
-		types.Add(typeof(R));
+		types.Add(typeof(TR));
 		var fnType = MakeDelegate(types.ToArray());
 		var fn = Marshal.GetDelegateForFunctionPointer(fnPtr, fnType);
-		return (R?) fn.DynamicInvoke(values.ToArray());
+		return (TR?) fn.DynamicInvoke(values.ToArray());
 	}
 }

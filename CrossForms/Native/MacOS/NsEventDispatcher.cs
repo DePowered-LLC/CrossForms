@@ -52,7 +52,7 @@ public class NsEventDispatcher: NsNested {
 		var name = Marshal.PtrToStringAnsi(ObjSelector.GetName(selector));
 		if (name == null) return;
 
-		var isNotification = NsNotification.proto.IsInstance(source);
+		var isNotification = NsNotification.Proto.IsInstance(source);
 		if (isNotification) {
 			var notification = new NsNotification { inner = source };
 			source = notification.Object;

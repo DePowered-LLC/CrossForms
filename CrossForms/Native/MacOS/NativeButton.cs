@@ -10,11 +10,11 @@ public class NativeButton: IButton {
 	internal NsButton? nsButton;
 
 	private EventHandler<ClickEvent>? _onClick;
-	public string text { get; set; } = "";
-	public int x { get; set; }
-	public int y { get; set; }
-	public ushort width { get; set; } = 120;
-	public ushort height { get; set; } = 22;
+	public string Text { get; set; } = "";
+	public int X { get; set; }
+	public int Y { get; set; }
+	public ushort Width { get; set; } = 120;
+	public ushort Height { get; set; } = 22;
 
 	public EventHandler<ClickEvent> OnClick {
 		get => _onClick!;
@@ -28,7 +28,7 @@ public class NativeButton: IButton {
 	}
 
 	internal NsButton CreateNsButton () {
-		var btn = new NsButton(text);
+		var btn = new NsButton(Text);
 		btn.OnClick(() => {
 			var clickPos = new ClickEvent();
 			var ev = NsApplication.Current.CurrentEvent;

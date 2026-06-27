@@ -24,8 +24,6 @@ public class NsApplication: NativeManaged<IntPtr> {
 	private readonly IntPtr _setActivationPolicySel = ObjSelector.Get("setActivationPolicy:");
 	private readonly IntPtr _setDelegateSel = ObjSelector.Get("setDelegate:");
 
-	private AppDelegate _appDelegate = null!;
-
 	public NsApplication () {
 		Current = this;
 		Proto.Construct(this, SharedApp);
@@ -35,10 +33,10 @@ public class NsApplication: NativeManaged<IntPtr> {
 	public bool IsRunning => ObjC.SendMessage(inner, ObjSelector.Get("isRunning")) != IntPtr.Zero;
 
 	internal AppDelegate AppDelegate {
-		get => _appDelegate;
+		get;
 		set {
 			ObjC.SendMessage(inner, _setDelegateSel, value.inner);
-			_appDelegate = value;
+			field = value;
 		}
 	}
 

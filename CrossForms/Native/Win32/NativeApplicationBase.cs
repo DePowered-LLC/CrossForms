@@ -8,7 +8,7 @@ using static CrossForms.Native.Win32.Internals.Internals;
 namespace CrossForms.Native.Win32;
 
 
-public class NativeApplication: IApplication {
+public class NativeApplicationBase: ApplicationBase {
 	private static IntPtr _actCtx;
 
 	public new static void Start () {
@@ -35,8 +35,8 @@ public class NativeApplication: IApplication {
 		GetMessage(out var msg, IntPtr.Zero, 0, 0);
 		if (msg.message == WmQuit) return false;
 
-		TranslateMessage(ref msg);
-		DispatchMessage(ref msg);
+		TranslateMessage(in msg);
+		DispatchMessage(in msg);
 		return true;
 	}
 

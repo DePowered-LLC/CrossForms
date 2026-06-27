@@ -9,34 +9,33 @@ namespace CrossForms.Native.Win32;
 public abstract class Control: IControl<Control> {
 	protected IntPtr handle;
 	protected bool IsLoaded => handle != IntPtr.Zero;
-	public Control? parent { get; set; }
-	public List<Control>? children { get; set; }
+	public Control? Parent { get; set; }
+	public List<Control>? Children { get; set; }
 
 	public void Append (Control child) {
-		if (children == null) return;
+		if (Children == null) return;
 
 		if (!IsLoaded) Load();
-		child.parent = this;
+		child.Parent = this;
 		if (!child.IsLoaded) child.Load();
-		children.Add(child);
+		Children.Add(child);
 	}
 
 	public void Remove () {
-		if (children == null) return;
-
+		if (Children == null) return;
 		if (IsLoaded) UnLoad();
-		if (parent != null) {
-			parent.children?.Remove(this);
-			parent = null;
-		}
+		if (Parent == null) return;
+		
+		Parent.Children?.Remove(this);
+		Parent = null;
 	}
 
 	public void Destroy () {
-		if (children == null) return;
+		if (Children == null) return;
 
 		if (IsLoaded) UnLoad();
-		parent = null;
-		foreach (var child in children) {
+		Parent = null;
+		foreach (var child in Children) {
 			child.Destroy();
 		}
 	}
@@ -45,8 +44,8 @@ public abstract class Control: IControl<Control> {
 
 	protected virtual void Load () {
 		var options = GetCreationOptions();
-		var parentInstPtr = parent != null
-			? GetWindowLongPtr(parent.handle, GWL.HINSTANCE)
+		var parentInstPtr = Parent != null
+			? GetWindowLongPtr(Parent.handle, Gwl.HInstance)
 			: GetModuleHandle();
 
 		handle = CreateWindowEx(
@@ -58,7 +57,7 @@ public abstract class Control: IControl<Control> {
 			options.y,
 			(int) options.width,
 			(int) options.height,
-			parent?.handle ?? IntPtr.Zero,
+			Parent?.handle ?? IntPtr.Zero,
 			IntPtr.Zero,
 			parentInstPtr,
 			IntPtr.Zero
@@ -71,13 +70,8 @@ public abstract class Control: IControl<Control> {
 		DestroyWindow(handle);
 	}
 
-	internal Control? GetChild (IntPtr handle) {
-		if (children == null) return null;
-		foreach (var control in children) {
-			if (control.handle == handle) return control;
-		}
-
-		return null;
+	internal Control? GetChild (IntPtr needle) {
+		return Children?.FirstOrDefault(control => control.handle == needle);
 	}
 
 	internal virtual IntPtr DispatchEvent (ushort command) {

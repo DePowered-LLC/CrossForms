@@ -9,25 +9,25 @@ public class NativeForm: IForm {
 	private NativeButton? _initialControl;
 
 	private NsWindow? _window;
-	public string id { get; set; } = "";
-	public string title { get; set; } = "";
-	public ushort width { get; set; }
-	public ushort height { get; set; }
+	public string Id { get; set; } = "";
+	public string Title { get; set; } = "";
+	public ushort Width { get; set; }
+	public ushort Height { get; set; }
 
 	public void SetInitialControl (IButton button) {
 		_initialControl = (NativeButton) button;
 	}
 
 	public void Show () {
-		var w = width > 0 ? (double) width : 800;
-		var h = height > 0 ? (double) height : 600;
+		var w = Width > 0 ? (double) Width : 800;
+		var h = Height > 0 ? (double) Height : 600;
 
 		_window = new NsWindow(
 			new CgRect(0, 0, w, h),
 			NsWindow.StyleMask.Titled | NsWindow.StyleMask.Closable | NsWindow.StyleMask.Resizable,
 			2
 		);
-		_window.Title = title;
+		_window.Title = Title;
 
 		_window.OnClose(() => {
 			if (!NsApplication.Current.IsRunning) return;
@@ -70,11 +70,11 @@ public class NativeForm: IForm {
 		}
 
 		var contentView = _window.ContentView;
-		var bw = button.width > 0 ? (double) button.width : 120;
-		var bh = button.height > 0 ? (double) button.height : 22;
+		var bw = button.Width > 0 ? (double) button.Width : 120;
+		var bh = button.Height > 0 ? (double) button.Height : 22;
 
-		nsBtn.LeadingAnchor.ConstraintToAnchor(contentView.LeadingAnchor, button.x).Active = true;
-		nsBtn.TopAnchor.ConstraintToAnchor(contentView.TopAnchor, button.y).Active = true;
+		nsBtn.LeadingAnchor.ConstraintToAnchor(contentView.LeadingAnchor, button.X).Active = true;
+		nsBtn.TopAnchor.ConstraintToAnchor(contentView.TopAnchor, button.Y).Active = true;
 		nsBtn.WidthAnchor.ConstraintToConstant(bw).Active = true;
 		nsBtn.HeightAnchor.ConstraintToConstant(bh).Active = true;
 	}

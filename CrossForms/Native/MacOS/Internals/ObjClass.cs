@@ -41,8 +41,7 @@ internal partial class ObjClass: NativeManaged<IntPtr> {
 
 	public static ObjClass Get (string name) {
 		var proto = TryGet(name);
-		if (proto == null) throw new Exception($"Class {name} not registered");
-		return proto;
+		return proto ?? throw new Exception($"Class {name} not registered");
 	}
 
 	public static ObjClass Of (IntPtr instance) {
@@ -108,8 +107,8 @@ internal partial class ObjClass: NativeManaged<IntPtr> {
 	[LibraryImport(ObjC.CocoaPath, EntryPoint = "class_addMethod", StringMarshalling = StringMarshalling.Utf8)]
 	private static partial byte AddClassMethod (IntPtr cls, IntPtr nameSel, IntPtr impl, string types);
 
-	public IntPtr AddMethod<[DynAccess(DynPubMethods)] D> (string name, D fn) where D: Delegate {
-		var fnType = typeof(D).GetMethod("Invoke");
+	public IntPtr AddMethod<[DynAccess(DynPubMethods)] TD> (string name, TD fn) where TD: Delegate {
+		var fnType = typeof(TD).GetMethod("Invoke");
 		var types = new StringBuilder();
 
 		// todo: оптимизировать создание метода

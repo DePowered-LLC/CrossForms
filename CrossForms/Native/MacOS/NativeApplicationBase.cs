@@ -4,7 +4,7 @@ using CrossForms.Native.MacOS.Internals;
 namespace CrossForms.Native.MacOS;
 
 
-public class NativeApplication: IApplication {
+public class NativeApplicationBase: ApplicationBase {
 	private static NsApplication? _app;
 
 	public new static void Start () {

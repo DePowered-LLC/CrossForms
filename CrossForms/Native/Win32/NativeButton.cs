@@ -5,17 +5,17 @@ namespace CrossForms.Native.Win32;
 
 
 public class NativeButton: Control, IButton {
-	internal NativeButton? _nextControl;
-	public required string text { get; set; }
-	public int x { get; set; } = 0;
-	public int y { get; set; } = 0;
-	public ushort width { get; set; } = 120;
-	public ushort height { get; set; } = 22;
+	internal NativeButton? nextControl;
+	public required string Text { get; set; }
+	public int X { get; set; } = 0;
+	public int Y { get; set; } = 0;
+	public ushort Width { get; set; } = 120;
+	public ushort Height { get; set; } = 22;
 
 	public EventHandler<ClickEvent> OnClick { get; set; } = (sender, e) => {};
 
 	public void SetNextControl (IButton next) {
-		_nextControl = (NativeButton) next;
+		nextControl = (NativeButton) next;
 	}
 
 	protected override ControlCreationOptions GetCreationOptions () {
@@ -23,11 +23,11 @@ public class NativeButton: Control, IButton {
 			className = "Button",
 			style = WindowStyle.TabStop | WindowStyle.Visible | WindowStyle.Child |
 			        (WindowStyle) (uint) ButtonStyle.Flat,
-			label = text,
-			width = width,
-			height = height,
-			x = x,
-			y = y
+			label = Text,
+			width = Width,
+			height = Height,
+			x = X,
+			y = Y
 		};
 	}
 
