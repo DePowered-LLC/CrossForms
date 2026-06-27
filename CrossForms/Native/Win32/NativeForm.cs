@@ -29,6 +29,10 @@ public class NativeForm: Control, IForm {
 		ShowWindow(handle, ShowWindowCommand.ShowNormal);
 	}
 
+	public void Append (NativeSelectBase select) {
+		Append((Control) select);
+	}
+
 	public void Append (NativeRadioGroup group) {
 		foreach (var item in group.Items) {
 			Append((NativeRadioButton) item);

@@ -66,6 +66,16 @@ try {
 	};
 	Application.MainWindow.Append(radioGroup);
 
+	var select = new Select<string>("Option A", "Option B", "Option C") {
+		X = 10, 
+		Y = 242, 
+		Width = 200
+	};
+	select.OnChange += (_, _) => {
+		Console.WriteLine($"Select: {select.ActiveItem}");
+	};
+	Application.MainWindow.Append(select);
+
 	Application.MainWindow.Show();
 	Application.Run();
 } catch (NativeException err) {

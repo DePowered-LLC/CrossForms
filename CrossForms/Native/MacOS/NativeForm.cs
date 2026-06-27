@@ -11,6 +11,7 @@ public class NativeForm: IForm {
 	private readonly List<NativeCheckBox> _checkBoxChildren = [];
 	private readonly List<NativeRadioButton> _radioButtonChildren = [];
 	private readonly HashSet<NativeRadioGroup> _radioGroups = [];
+	private readonly List<NativeSelectBase> _selectChildren = [];
 	private NativeButton? _initialControl;
 
 	private NsWindow? _window;
@@ -63,6 +64,10 @@ public class NativeForm: IForm {
 			ApplyRadioGroupInitialSelection(group);
 		}
 
+		foreach (var select in _selectChildren) {
+			AttachSelect(select);
+		}
+
 		foreach (var btn in _children) {
 			if (btn.nextControl?.nsButton != null) {
 				btn.nsButton!.SetNextKeyView(btn.nextControl.nsButton);
@@ -73,6 +78,11 @@ public class NativeForm: IForm {
 		if (first?.nsButton != null) {
 			_window.SetInitialFirstResponder(first.nsButton);
 		}
+	}
+
+	public void Append (NativeSelectBase select) {
+		_selectChildren.Add(select);
+		if (_window != null) AttachSelect(select);
 	}
 
 	public void Append (NativeRadioGroup group) {
@@ -112,6 +122,21 @@ public class NativeForm: IForm {
 		if (_window != null) {
 			AttachButton(button);
 		}
+	}
+
+	private void AttachSelect (NativeSelectBase select) {
+		var nsPb = select.CreateNsPopUpButton();
+		select.nsPopUpButton = nsPb;
+		_window!.Append(nsPb);
+
+		var contentView = _window.ContentView;
+		var sw = select.Width > 0 ? (double) select.Width : 200;
+		var sh = select.Height > 0 ? (double) select.Height : 26;
+
+		nsPb.LeadingAnchor.ConstraintToAnchor(contentView.LeadingAnchor, select.X).Active = true;
+		nsPb.TopAnchor.ConstraintToAnchor(contentView.TopAnchor, select.Y).Active = true;
+		nsPb.WidthAnchor.ConstraintToConstant(sw).Active = true;
+		nsPb.HeightAnchor.ConstraintToConstant(sh).Active = true;
 	}
 
 	private void AttachRadioButton (NativeRadioButton radioButton) {

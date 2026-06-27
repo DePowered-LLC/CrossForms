@@ -69,6 +69,9 @@ internal partial class Internals {
 	[DllImport("user32.dll")]
 	public static extern IntPtr SendMessage (IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
+	[DllImport("user32.dll", CharSet = CharSet.Unicode)]
+	public static extern IntPtr SendMessage (IntPtr hWnd, uint msg, int wParam, string lParam);
+
 	public static string GetWindowText (IntPtr hWnd) {
 		var sb = new System.Text.StringBuilder(256);
 		GetWindowText(hWnd, sb, sb.Capacity);
