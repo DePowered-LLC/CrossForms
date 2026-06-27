@@ -24,9 +24,7 @@ public class NativeApplicationBase: ApplicationBase {
 
 		ActivateActCtx(ctxHandle, out _actCtx);
 
-		// if (!InitCommonControlsEx(ControlClass.NativeFont)) {
-		// 	throw new Win32Exception("Common control classes not loaded");
-		// }
+		InitCommonControlsEx(ControlClass.Progress | ControlClass.Standard);
 
 		// SetThemeAppProperties(ThemeAppProperty.AllowControls | ThemeAppProperty.AllowNonClient);
 	}

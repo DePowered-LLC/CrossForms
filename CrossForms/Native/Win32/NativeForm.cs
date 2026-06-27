@@ -29,6 +29,10 @@ public class NativeForm: Control, IForm {
 		ShowWindow(handle, ShowWindowCommand.ShowNormal);
 	}
 
+	public void Append (NativeProgressBar progressBar) {
+		Append((Control) progressBar);
+	}
+
 	public void Append (NativeSelectBase select) {
 		Append((Control) select);
 	}

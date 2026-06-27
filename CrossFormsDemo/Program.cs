@@ -3,78 +3,79 @@ using CrossForms.Native;
 
 try {
 	Application.Start();
-	Application.MainWindow = new Form("MainWindow", "Тестовое окно");
+	Application.MainWindow = new Form("MainWindow", "Demo Window") {
+		Width = 440,
+		Height = 420
+	};
 
-	var testBtn1 = new Button("Hello!") {
-		X = 10,
-		Y = 10,
-		Width = 200,
-		Height = 22
-	};
-	testBtn1.OnClick += (_, e) => {
-		Console.WriteLine($"Button 1 click at ({e.x}; {e.y})");
-	};
-	Application.MainWindow.Append(testBtn1);
-	
-	var label1 = new Label("Пример текста\n123-321") {
-		X = 10,
-		Y = 36,
-		Height = 40
-	};
+	var label1 = new Label("Type something:") { X = 10, Y = 10, Width = 200 };
 	Application.MainWindow.Append(label1);
 
-	var input1 = new TextBox("default") {
-		X = 10,
-		Y = 100,
-		Width = 200,
-		Height = 22
-	};
+	var input1 = new TextBox { X = 10, Y = 30, Width = 200, Height = 22 };
 	Application.MainWindow.Append(input1);
 
-	var testBtn2 = new Button("Read input below") {
-		X = 10,
-		Y = 72,
-		Width = 200,
-		Height = 22
-	};
-	testBtn2.OnClick += (_, _) => {
-		Console.WriteLine($"Input value: {input1.Text}");
-	};
-	testBtn2.SetNextControl(testBtn1);
-	Application.MainWindow.Append(testBtn2);
-	Application.MainWindow.SetInitialControl(testBtn2);
-	
-	var checkBox1 = new CheckBox("Enable input above") {
-		X = 10,
-		Y = 130,
-		Width = 200,
-		Height = 22,
-		Checked = true
-	};
-	checkBox1.OnChange += (_, _) => {
-		input1.Enabled = checkBox1.Checked;
-	};
-	Application.MainWindow.Append(checkBox1);
+	var btnRead = new Button("Read") { X = 220, Y = 30, Width = 100, Height = 22 };
+	btnRead.OnClick += (_, _) => Console.WriteLine($"Input: {input1.Text}");
+	Application.MainWindow.Append(btnRead);
 
-	var rb1 = new RadioButton("Option A") { X = 10, Y = 162, Width = 200 };
-	var rb2 = new RadioButton("Option B") { X = 10, Y = 186, Width = 200 };
-	var rb3 = new RadioButton("Option C") { X = 10, Y = 210, Width = 200 };
-	
-	var radioGroup = new RadioGroup(rb1, rb2, rb3) { SelectedIndex = 0 };
-	radioGroup.OnChange += (_, e) => {
-		Console.WriteLine($"Radio selected: {e.selectedIndex}");
+	var checkEnable = new CheckBox("Input enabled") {
+		X = 10, Y = 58, Width = 200, Height = 22, Checked = true
 	};
+	checkEnable.OnChange += (_, _) => { input1.Enabled = checkEnable.Checked; };
+	Application.MainWindow.Append(checkEnable);
+
+	var progressLabel = new Label("Progress (controlled by RadioGroup):") {
+		X = 10, Y = 96, Width = 300
+	};
+	Application.MainWindow.Append(progressLabel);
+
+	var progress = new ProgressBar {
+		X = 10, Y = 116, Width = 400, Height = 18,
+		Min = 0, Max = 100, Value = 0
+	};
+	Application.MainWindow.Append(progress);
+
+	var rb1 = new RadioButton("0%") { X = 10, Y = 142, Width = 90 };
+	var rb2 = new RadioButton("25%") { X = 110, Y = 142, Width = 90 };
+	var rb3 = new RadioButton("50%") { X = 210, Y = 142, Width = 90 };
+	var rb4 = new RadioButton("100%") { X = 310, Y = 142, Width = 90 };
+
+	double[] radioValues = [0, 25, 50, 100];
+	var radioGroup = new RadioGroup(rb1, rb2, rb3, rb4);
+	radioGroup.OnChange += (_, e) => { progress.Value = radioValues[e.selectedIndex]; };
 	Application.MainWindow.Append(radioGroup);
 
-	var select = new Select<string>("Option A", "Option B", "Option C") {
-		X = 10, 
-		Y = 242, 
-		Width = 200
+	var selectLabel = new Label("Or pick a preset:") { X = 10, Y = 174, Width = 180 };
+	Application.MainWindow.Append(selectLabel);
+
+	(string Name, double Value)[] presets = [
+		("Not started", 0),
+		("Quarter", 25),
+		("Half", 50),
+		("Three quarters", 75),
+		("Done", 100)
+	];
+
+	var presetSelect = new Select<(string Name, double Value)>(p => p.Name, presets) {
+		X = 10, Y = 194, Width = 200
 	};
-	select.OnChange += (_, _) => {
-		Console.WriteLine($"Select: {select.ActiveItem}");
+	presetSelect.OnChange += (_, _) => { progress.Value = presetSelect.ActiveItem.Value; };
+	Application.MainWindow.Append(presetSelect);
+
+	var spinnerLabel = new Label("Indeterminate:") { X = 10, Y = 232, Width = 140 };
+	Application.MainWindow.Append(spinnerLabel);
+
+	var spinner = new ProgressBar {
+		X = 10, Y = 252, Width = 400, Height = 18,
+		Indeterminate = true
 	};
-	Application.MainWindow.Append(select);
+	Application.MainWindow.Append(spinner);
+
+	var checkSpinner = new CheckBox("Show indeterminate") {
+		X = 10, Y = 280, Width = 220, Height = 22, Checked = true
+	};
+	checkSpinner.OnChange += (_, _) => { spinner.Indeterminate = checkSpinner.Checked; };
+	Application.MainWindow.Append(checkSpinner);
 
 	Application.MainWindow.Show();
 	Application.Run();

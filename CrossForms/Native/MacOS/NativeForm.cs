@@ -12,6 +12,7 @@ public class NativeForm: IForm {
 	private readonly List<NativeRadioButton> _radioButtonChildren = [];
 	private readonly HashSet<NativeRadioGroup> _radioGroups = [];
 	private readonly List<NativeSelectBase> _selectChildren = [];
+	private readonly List<NativeProgressBar> _progressBarChildren = [];
 	private NativeButton? _initialControl;
 
 	private NsWindow? _window;
@@ -68,6 +69,10 @@ public class NativeForm: IForm {
 			AttachSelect(select);
 		}
 
+		foreach (var progressBar in _progressBarChildren) {
+			AttachProgressBar(progressBar);
+		}
+
 		foreach (var btn in _children) {
 			if (btn.nextControl?.nsButton != null) {
 				btn.nsButton!.SetNextKeyView(btn.nextControl.nsButton);
@@ -78,6 +83,11 @@ public class NativeForm: IForm {
 		if (first?.nsButton != null) {
 			_window.SetInitialFirstResponder(first.nsButton);
 		}
+	}
+
+	public void Append (NativeProgressBar progressBar) {
+		_progressBarChildren.Add(progressBar);
+		if (_window != null) AttachProgressBar(progressBar);
 	}
 
 	public void Append (NativeSelectBase select) {
@@ -122,6 +132,21 @@ public class NativeForm: IForm {
 		if (_window != null) {
 			AttachButton(button);
 		}
+	}
+
+	private void AttachProgressBar (NativeProgressBar progressBar) {
+		var nsPi = progressBar.CreateNsProgressIndicator();
+		progressBar.nsProgressIndicator = nsPi;
+		_window!.ContentView.AddSubview(nsPi);
+
+		var contentView = _window.ContentView;
+		var pw = progressBar.Width > 0 ? (double) progressBar.Width : 200;
+		var ph = progressBar.Height > 0 ? (double) progressBar.Height : 20;
+
+		nsPi.LeadingAnchor.ConstraintToAnchor(contentView.LeadingAnchor, progressBar.X).Active = true;
+		nsPi.TopAnchor.ConstraintToAnchor(contentView.TopAnchor, progressBar.Y).Active = true;
+		nsPi.WidthAnchor.ConstraintToConstant(pw).Active = true;
+		nsPi.HeightAnchor.ConstraintToConstant(ph).Active = true;
 	}
 
 	private void AttachSelect (NativeSelectBase select) {
