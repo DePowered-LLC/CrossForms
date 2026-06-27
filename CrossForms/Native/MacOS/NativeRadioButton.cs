@@ -4,7 +4,7 @@ using CrossForms.Native.MacOS.Internals;
 namespace CrossForms.Native.MacOS;
 
 
-public class NativeRadioButton: IRadioButton {
+public class NativeRadioButton: IRadioButton, INativeAttachable, INativeFocusable {
 	internal NsRadioButton? nsRadioButton;
 	internal NativeRadioGroup? group;
 
@@ -34,12 +34,26 @@ public class NativeRadioButton: IRadioButton {
 	public ushort Width { get; set; } = 120;
 	public ushort Height { get; set; } = 22;
 
-	internal NsRadioButton CreateNsRadioButton () {
-		var rb = new NsRadioButton(Text) {
-			State = _checked
-		};
-		
+	public NsView? FocusView => nsRadioButton;
+
+	public void AttachTo (NsWindow window) {
+		var rb = new NsRadioButton(Text) { State = _checked };
+		nsRadioButton = rb;
 		if (!_enabled) rb.Enabled = false;
-		return rb;
+
+		if (group != null) {
+			var index = Array.IndexOf(group.Items, this);
+			rb.OnClick(() => {
+				foreach (var item in group.Items) {
+					((NativeRadioButton) item).nsRadioButton!.State = false;
+				}
+
+				rb.State = true;
+				group.NotifyChange(index);
+			});
+		}
+
+		window.Append(rb);
+		rb.ApplyConstraints(window, X, Y, Width, Height);
 	}
 }

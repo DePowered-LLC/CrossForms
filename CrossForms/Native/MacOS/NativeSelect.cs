@@ -4,7 +4,7 @@ using CrossForms.Native.MacOS.Internals;
 namespace CrossForms.Native.MacOS;
 
 
-public abstract class NativeSelectBase: ISelect {
+public abstract class NativeSelectBase: ISelect, INativeAttachable, INativeFocusable {
 	internal NsPopUpButton? nsPopUpButton;
 
 	protected int selectedIndex;
@@ -35,6 +35,15 @@ public abstract class NativeSelectBase: ISelect {
 	public EventHandler<SelectChangeEvent> OnChange {
 		get => onChange!;
 		set => onChange = value;
+	}
+
+	public NsView? FocusView => nsPopUpButton;
+
+	public void AttachTo (NsWindow window) {
+		var pb = CreateNsPopUpButton();
+		nsPopUpButton = pb;
+		window.Append(pb);
+		pb.ApplyConstraints(window, X, Y, Width, Height);
 	}
 
 	internal abstract NsPopUpButton CreateNsPopUpButton ();

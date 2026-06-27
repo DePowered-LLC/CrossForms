@@ -4,9 +4,7 @@ using CrossForms.Native.MacOS.Internals;
 namespace CrossForms.Native.MacOS;
 
 
-public class NativeButton: IButton {
-	internal NativeButton? nextControl;
-
+public class NativeButton: IButton, INativeAttachable, INativeFocusable {
 	internal NsButton? nsButton;
 
 	private bool _enabled = true;
@@ -21,7 +19,7 @@ public class NativeButton: IButton {
 			nsButton?.Enabled = value;
 		}
 	}
-	
+
 	public int X { get; set; }
 	public int Y { get; set; }
 	public ushort Width { get; set; } = 120;
@@ -32,15 +30,18 @@ public class NativeButton: IButton {
 		set => _onClick = value;
 	}
 
+	public NsView? FocusView => nsButton;
+
 	public void SetNextControl (IButton next) {
-		nextControl = (NativeButton) next;
-		if (nsButton != null && nextControl.nsButton != null) {
-			nsButton.SetNextKeyView(nextControl.nsButton);
+		var nextBtn = (NativeButton) next;
+		if (nsButton != null && nextBtn.nsButton != null) {
+			nsButton.SetNextKeyView(nextBtn.nsButton);
 		}
 	}
 
-	internal NsButton CreateNsButton () {
+	public void AttachTo (NsWindow window) {
 		var btn = new NsButton(Text);
+		nsButton = btn;
 		if (!_enabled) btn.Enabled = false;
 		btn.OnClick(() => {
 			var clickPos = new ClickEvent();
@@ -56,7 +57,8 @@ public class NativeButton: IButton {
 
 			_onClick?.Invoke(this, clickPos);
 		});
-		
-		return btn;
+
+		window.Append(btn);
+		btn.ApplyConstraints(window, X, Y, Width, Height);
 	}
 }

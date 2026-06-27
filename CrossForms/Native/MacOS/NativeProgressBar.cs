@@ -4,7 +4,7 @@ using CrossForms.Native.MacOS.Internals;
 namespace CrossForms.Native.MacOS;
 
 
-public class NativeProgressBar: IProgressBar {
+public class NativeProgressBar: IProgressBar, INativeAttachable {
 	internal NsProgressIndicator? nsProgressIndicator;
 
 	private double _min = 0;
@@ -49,12 +49,15 @@ public class NativeProgressBar: IProgressBar {
 	public ushort Width { get; set; } = 200;
 	public ushort Height { get; set; } = 20;
 
-	internal NsProgressIndicator CreateNsProgressIndicator () {
-		return new NsProgressIndicator {
+	public void AttachTo (NsWindow window) {
+		var pi = new NsProgressIndicator {
 			MinValue = _min,
 			MaxValue = _max,
 			Value = _value,
 			Indeterminate = _indeterminate
 		};
+		nsProgressIndicator = pi;
+		window.ContentView.AddSubview(pi);
+		pi.ApplyConstraints(window, X, Y, Width, Height);
 	}
 }

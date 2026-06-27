@@ -4,7 +4,7 @@ using CrossForms.Native.MacOS.Internals;
 namespace CrossForms.Native.MacOS;
 
 
-public class NativeTextBox: ITextBox {
+public class NativeTextBox: ITextBox, INativeAttachable, INativeFocusable {
 	internal NsTextInput? nsTextInput;
 
 	private string _text = "";
@@ -37,10 +37,15 @@ public class NativeTextBox: ITextBox {
 		set => _onChange = value;
 	}
 
-	internal NsTextInput CreateNsTextInput () {
+	public NsView? FocusView => nsTextInput;
+
+	public void AttachTo (NsWindow window) {
 		var tf = new NsTextInput(_text);
+		nsTextInput = tf;
 		if (!_enabled) tf.Enabled = false;
 		tf.OnChange(() => _onChange?.Invoke(this, new ChangeEvent { Text = tf.StringValue }));
-		return tf;
+
+		window.Append(tf);
+		tf.ApplyConstraints(window, X, Y, Width, Height);
 	}
 }

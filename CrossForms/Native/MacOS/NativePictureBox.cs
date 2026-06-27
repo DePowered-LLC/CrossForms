@@ -4,7 +4,7 @@ using CrossForms.Native.MacOS.Internals;
 namespace CrossForms.Native.MacOS;
 
 
-public class NativePictureBox: IPictureBox {
+public class NativePictureBox: IPictureBox, INativeAttachable {
 	internal NsImageView? nsImageView;
 	private string _imagePath = "";
 	private byte[]? _imageData;
@@ -34,14 +34,13 @@ public class NativePictureBox: IPictureBox {
 	public ushort Width { get; set; } = 100;
 	public ushort Height { get; set; } = 100;
 
-	internal NsImageView CreateNsImageView () {
+	public void AttachTo (NsWindow window) {
 		var iv = new NsImageView();
-		if (_imageData != null) {
-			iv.ImageData = _imageData;
-		} else if (_imagePath != "") {
-			iv.ImagePath = _imagePath;
-		}
-		
-		return iv;
+		nsImageView = iv;
+		if (_imageData != null) iv.ImageData = _imageData;
+		else if (_imagePath != "") iv.ImagePath = _imagePath;
+
+		window.ContentView.AddSubview(iv);
+		iv.ApplyConstraints(window, X, Y, Width, Height);
 	}
 }

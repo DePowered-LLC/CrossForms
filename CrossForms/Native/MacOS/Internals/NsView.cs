@@ -94,6 +94,14 @@ public partial class NsView: NsNested {
 	public void SetNextKeyView (NsView view) {
 		ObjC.SendMessage(inner, SetNextKeyViewSel, view.inner);
 	}
+
+	internal void ApplyConstraints (NsWindow window, int x, int y, double width, double height) {
+		var view = window.ContentView;
+		LeadingAnchor.ConstraintToAnchor(view.LeadingAnchor, x).Active = true;
+		TopAnchor.ConstraintToAnchor(view.TopAnchor, y).Active = true;
+		WidthAnchor.ConstraintToConstant(width).Active = true;
+		HeightAnchor.ConstraintToConstant(height).Active = true;
+	}
 }
 
 internal class NsLayoutYAxisAnchor: NativeManaged<IntPtr> {

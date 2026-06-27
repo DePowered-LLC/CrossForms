@@ -4,7 +4,7 @@ using CrossForms.Native.MacOS.Internals;
 namespace CrossForms.Native.MacOS;
 
 
-public class NativeCheckBox: ICheckBox {
+public class NativeCheckBox: ICheckBox, INativeAttachable, INativeFocusable {
 	internal NsCheckBox? nsCheckBox;
 
 	private bool _checked;
@@ -39,14 +39,20 @@ public class NativeCheckBox: ICheckBox {
 		set => _onChange = value;
 	}
 
-	internal NsCheckBox CreateNsCheckBox () {
+	public NsView? FocusView => nsCheckBox;
+
+	public void AttachTo (NsWindow window) {
 		var cb = new NsCheckBox(Text);
+		nsCheckBox = cb;
 		cb.State = _checked;
 		if (!_enabled) cb.Enabled = false;
+		
 		cb.OnClick(() => {
 			_checked = cb.State;
 			_onChange?.Invoke(this, new CheckEvent { Checked = _checked });
 		});
-		return cb;
+
+		window.Append(cb);
+		cb.ApplyConstraints(window, X, Y, Width, Height);
 	}
 }
