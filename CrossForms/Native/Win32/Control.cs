@@ -7,6 +7,8 @@ namespace CrossForms.Native.Win32;
 
 
 public abstract class Control: IControl<Control>, IEnabled {
+	internal static IntPtr AppFont = IntPtr.Zero;
+
 	protected IntPtr handle;
 	protected bool IsLoaded => handle != IntPtr.Zero;
 	public Control? Parent { get; set; }
@@ -57,15 +59,16 @@ public abstract class Control: IControl<Control>, IEnabled {
 			? GetWindowLongPtr(Parent.handle, Gwl.HInstance)
 			: GetModuleHandle();
 
+		var dpi = NativeApplicationBase.DpiScale;
 		handle = CreateWindowEx(
 			options.styleEx,
 			options.className,
 			options.label,
 			options.style,
-			options.x,
-			options.y,
-			(int) options.width,
-			(int) options.height,
+			(int) (options.x * dpi),
+			(int) (options.y * dpi),
+			(int) (options.width * dpi),
+			(int) (options.height * dpi),
 			Parent?.handle ?? IntPtr.Zero,
 			IntPtr.Zero,
 			parentInstPtr,
@@ -74,6 +77,7 @@ public abstract class Control: IControl<Control>, IEnabled {
 
 		if (handle == IntPtr.Zero) throw new Win32Exception("Cannot create control");
 		if (!_enabled) EnableWindow(handle, false);
+		if (AppFont != IntPtr.Zero) SendMessage(handle, WmSetFont, AppFont, (IntPtr) 1);
 	}
 
 	protected virtual void UnLoad () {

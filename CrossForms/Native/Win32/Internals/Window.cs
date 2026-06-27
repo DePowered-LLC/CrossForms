@@ -14,6 +14,7 @@ internal partial class Internals {
 	public const uint WmUser = 0x0400;
 	public const uint WmTray = WmUser + 1;
 	public const uint WmSize = 0x0005;
+	public const uint WmSetFont = 0x0030;
 	public const uint WmCtlColorBtn = 0x0135;
 	public const uint WmCtlColorStatic = 0x0138;
 
@@ -70,6 +71,12 @@ internal partial class Internals {
 	public static extern bool EnableWindow (IntPtr hWnd, bool bEnable);
 
 	[DllImport("user32.dll")]
+	public static extern bool SetProcessDpiAwarenessContext (IntPtr value);
+
+	[DllImport("user32.dll")]
+	public static extern uint GetDpiForSystem ();
+
+	[DllImport("user32.dll")]
 	public static extern bool IsWindowEnabled (IntPtr hWnd);
 
 	[DllImport("user32.dll")]
@@ -92,6 +99,14 @@ internal partial class Internals {
 
 	[DllImport("gdi32.dll")]
 	public static extern IntPtr GetStockObject (int fnObject);
+
+	[DllImport("gdi32.dll", CharSet = CharSet.Unicode)]
+	public static extern IntPtr CreateFont (
+		int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight,
+		uint fdwItalic, uint fdwUnderline, uint fdwStrikeOut,
+		uint fdwCharSet, uint fdwOutputPrecision, uint fdwClipPrecision,
+		uint fdwQuality, uint fdwPitchAndFamily, string lpszFace
+	);
 
 	[DllImport("gdi32.dll")]
 	public static extern uint SetBkColor (IntPtr hdc, uint color);
