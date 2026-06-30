@@ -14,9 +14,12 @@ public class NativeLabel: ILabel, INativeAttachable {
 	public ushort Height { get; set; } = 17;
 
 	public void AttachTo (NsWindow window) {
-		var tf = new NsTextField(Text);
+		var nsLabelText = NsString.CloneOwned(Text);
+		var tf = NsTextField.CreateAuto(nsLabelText);
+		nsLabelText.Release();
+		
 		nsTextField = tf;
-		window.ContentView.AddSubview(tf);
+		window.BorrowContentView().AddSubview(tf);
 		tf.ApplyConstraints(window, X, Y, Width, Height);
 	}
 }

@@ -50,14 +50,14 @@ public class NativeProgressBar: IProgressBar, INativeAttachable {
 	public ushort Height { get; set; } = 20;
 
 	public void AttachTo (NsWindow window) {
-		var pi = new NsProgressIndicator {
-			MinValue = _min,
-			MaxValue = _max,
-			Value = _value,
-			Indeterminate = _indeterminate
-		};
-		nsProgressIndicator = pi;
-		window.ContentView.AddSubview(pi);
-		pi.ApplyConstraints(window, X, Y, Width, Height);
+		var bar = NsProgressIndicator.CreateOwned();
+		bar.MinValue = _min;
+		bar.MaxValue = _max;
+		bar.Value = _value;
+		bar.Indeterminate = _indeterminate;
+		nsProgressIndicator = bar;
+		
+		window.BorrowContentView().AddSubview(bar);
+		bar.ApplyConstraints(window, X, Y, Width, Height);
 	}
 }

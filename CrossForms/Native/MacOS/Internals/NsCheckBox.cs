@@ -1,21 +1,31 @@
-using System.Runtime.InteropServices;
-
 namespace CrossForms.Native.MacOS.Internals;
 
 
-public partial class NsCheckBox: NsControl {
-	private static readonly ObjClass Proto = ObjClass.Get("NSButton");
+public class NsCheckBox: NsControl, IObjClass<NsCheckBox> {
+	private new static readonly ObjClass<NsCheckBox> Proto = ObjClass<NsCheckBox>.Get("NSButton");
+	
 	private static readonly IntPtr CheckboxWithTitleSel = ObjSelector.Get("checkboxWithTitle:target:action:");
 	private static readonly IntPtr SetTargetSel = ObjSelector.Get("setTarget:");
 	private static readonly IntPtr SetActionSel = ObjSelector.Get("setAction:");
 	private static readonly IntPtr GetStateSel = ObjSelector.Get("state");
 	private static readonly IntPtr SetStateSel = ObjSelector.Get("setState:");
 
-	public NsCheckBox (string title) {
-		inner = SendMessage(Proto.inner, CheckboxWithTitleSel, new NsString(title).inner,
-			NsApplication.Current.AppDelegate.inner, AppDelegate.NO_OP);
-		TranslatesAutoresizingMaskIntoConstraints = false;
+	public static NsCheckBox CreateAuto (NsString title, MethodRef handler) {
+		var inner = ObjC.SendMessage(
+			Proto.inner,
+			CheckboxWithTitleSel,
+			title.inner,
+			handler.DelegatePtr,
+			handler.MethodPtr
+		);
+		
+		return new NsCheckBox(inner) {
+			TranslatesAutoresizingMaskIntoConstraints = false
+		};
 	}
+	
+	public new static NsCheckBox Borrow (IntPtr ptr) => new(ptr);
+	protected NsCheckBox (IntPtr ptr): base(ptr) {}
 
 	public bool State {
 		get => ObjC.SendMessage(inner, GetStateSel) != IntPtr.Zero;
@@ -28,9 +38,4 @@ public partial class NsCheckBox: NsControl {
 			ObjC.SendMessage(inner, SetActionSel, selector);
 		});
 	}
-
-	[LibraryImport(ObjC.CocoaPath, EntryPoint = "objc_msgSend")]
-	private static partial IntPtr SendMessage (
-		IntPtr cls, IntPtr selector, IntPtr title, IntPtr appDelegate, IntPtr handler
-	);
 }

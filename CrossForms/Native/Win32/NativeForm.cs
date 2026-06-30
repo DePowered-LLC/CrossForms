@@ -25,7 +25,13 @@ public class NativeForm: Control, IForm {
 	}
 
 	public void Show () {
-		if (!IsLoaded) Load();
+		if (!IsLoaded) {
+			Load();
+			foreach (var child in Children!) {
+				child.EnsureLoaded();
+			}
+		}
+		
 		ShowWindow(handle, ShowWindowCommand.ShowNormal);
 	}
 
@@ -57,7 +63,11 @@ public class NativeForm: Control, IForm {
 
 	protected override ControlCreationOptions GetCreationOptions () {
 		_windowClass = WindowClassEx.CreateDefault(Id, OnWindowMessage);
-		if (!_windowClass.Register()) throw new Win32Exception($"Cannot register \"{Id}\" window class");
+		// Clears stale registration if previous UnLoad happened during WM_DESTROY
+		_windowClass.UnRegister();
+		if (!_windowClass.Register()) {
+			throw new Win32Exception($"Cannot register \"{Id}\" window class");
+		}
 
 		return new ControlCreationOptions {
 			className = Id,
@@ -107,10 +117,15 @@ public class NativeForm: Control, IForm {
 	}
 
 	protected override void UnLoad () {
-		_windowClass.UnRegister();
+		handle = IntPtr.Zero;
+		foreach (var child in Children!) {
+			child.ResetHandle();
+		}
 
+		if (ApplicationBase.HasActiveTray) return;
 		if (Application.MainWindow == null) return;
-		if ((IForm) this == Application.MainWindow)
+		if ((IForm) this == Application.MainWindow) {
 			PostQuitMessage(0);
+		}
 	}
 }

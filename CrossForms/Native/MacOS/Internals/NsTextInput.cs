@@ -1,23 +1,31 @@
-using System.Runtime.InteropServices;
-
 namespace CrossForms.Native.MacOS.Internals;
 
 
-public partial class NsTextInput: NsControl {
-	private static readonly ObjClass Proto = ObjClass.Get("NSTextField");
+public class NsTextInput: NsControl, IObjClass<NsTextInput> {
+	public new static readonly ObjClass<NsTextInput> Proto = ObjClass<NsTextInput>.Get("NSTextField");
+	
 	private static readonly IntPtr TextFieldWithStringSel = ObjSelector.Get("textFieldWithString:");
 	private static readonly IntPtr GetStringValueSel = ObjSelector.Get("stringValue");
 	private static readonly IntPtr SetStringValueSel = ObjSelector.Get("setStringValue:");
 	private static readonly IntPtr SetDelegateSel = ObjSelector.Get("setDelegate:");
 
-	public NsTextInput (string text) {
-		inner = SendMessage(Proto.inner, TextFieldWithStringSel, new NsString(text).inner);
-		TranslatesAutoresizingMaskIntoConstraints = false;
+	public static NsTextInput CreateAuto (NsString text) {
+		var inner = ObjC.SendMessage(Proto.inner, TextFieldWithStringSel, text.inner);
+		return new NsTextInput(inner) {
+			TranslatesAutoresizingMaskIntoConstraints = false
+		};
 	}
 
+	public new static NsTextInput Borrow (IntPtr ptr) => new(ptr);
+	protected NsTextInput (IntPtr ptr): base(ptr) {}
+
 	public string StringValue {
-		get => new NsString(ObjC.SendMessage(inner, GetStringValueSel)).Value;
-		set => ObjC.SendMessage(inner, SetStringValueSel, new NsString(value).inner);
+		get => NsString.Borrow(ObjC.SendMessage(inner, GetStringValueSel)).Value;
+		set {
+			var nsValue = NsString.CloneOwned(value);
+			ObjC.SendMessage(inner, SetStringValueSel, nsValue.inner);
+			nsValue.Release();
+		}
 	}
 
 	public void OnChange (Action handler) {
@@ -25,7 +33,4 @@ public partial class NsTextInput: NsControl {
 			ObjC.SendMessage(inner, SetDelegateSel, dispatcher.dispatcherInstance);
 		});
 	}
-
-	[LibraryImport(ObjC.CocoaPath, EntryPoint = "objc_msgSend")]
-	private static partial IntPtr SendMessage (IntPtr cls, IntPtr selector, IntPtr str);
 }

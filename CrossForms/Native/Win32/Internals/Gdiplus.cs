@@ -47,17 +47,37 @@ internal partial class Internals {
 	[LibraryImport("gdiplus.dll")]
 	private static partial int GdipDeleteGraphics (IntPtr graphics);
 
-	[LibraryImport("gdiplus.dll")]
+	[LibraryImport("gdiplus.dll", EntryPoint = "GdipCreateHBITMAPFromBitmap")]
 	private static partial int GdipCreateHBITMAPFromBitmap (IntPtr bitmap, out IntPtr hbmReturn, uint background);
 
 	[LibraryImport("gdiplus.dll")]
 	private static partial int GdipDisposeImage (IntPtr image);
 
-	[LibraryImport("shlwapi.dll")]
-	private static partial IntPtr SHCreateMemStream (byte[] pInit, uint cbInit);
+	[LibraryImport("gdiplus.dll", EntryPoint = "GdipCreateHICONFromBitmap")]
+	private static partial int GdipCreateHiconFromBitmap (IntPtr bitmap, out IntPtr hbmReturn);
+
+	[LibraryImport("shlwapi.dll", EntryPoint = "SHCreateMemStream")]
+	private static partial IntPtr ShCreateMemStream (byte[] pInit, uint cbInit);
+
+	public static IntPtr HIconFromImageData (byte[] data) {
+		var stream = ShCreateMemStream(data, (uint) data.Length);
+		if (stream == IntPtr.Zero) throw new Win32Exception("SHCreateMemStream failed");
+		try {
+			var status = GdipCreateBitmapFromStream(stream, out var bitmap);
+			if (status != 0) throw new Win32Exception($"GdipCreateBitmapFromStream failed: GDI+ status {status}");
+			try {
+				GdipCreateHiconFromBitmap(bitmap, out var hIcon);
+				return hIcon;
+			} finally {
+				GdipDisposeImage(bitmap);
+			}
+		} finally {
+			Marshal.Release(stream);
+		}
+	}
 
 	public static IntPtr HBitmapFromImageData (byte[] data, int width, int height) {
-		var stream = SHCreateMemStream(data, (uint) data.Length);
+		var stream = ShCreateMemStream(data, (uint) data.Length);
 		if (stream == IntPtr.Zero) throw new Win32Exception("SHCreateMemStream failed");
 		try {
 			var status = GdipCreateBitmapFromStream(stream, out var original);

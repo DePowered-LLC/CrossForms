@@ -84,6 +84,12 @@ public abstract class Control: IControl<Control>, IEnabled {
 		DestroyWindow(handle);
 	}
 
+	internal void ResetHandle () => handle = IntPtr.Zero;
+
+	internal void EnsureLoaded () {
+		if (!IsLoaded) Load();
+	}
+
 	internal Control? GetChild (IntPtr needle) {
 		return Children?.FirstOrDefault(control => control.handle == needle);
 	}

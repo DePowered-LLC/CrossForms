@@ -40,9 +40,15 @@ public class NativeTextBox: ITextBox, INativeAttachable, INativeFocusable {
 	public NsView? FocusView => nsTextInput;
 
 	public void AttachTo (NsWindow window) {
-		var tf = new NsTextInput(_text);
+		var nsText = NsString.CloneOwned(_text);
+		var tf = NsTextInput.CreateAuto(nsText);
+		nsText.Release();
 		nsTextInput = tf;
-		if (!_enabled) tf.Enabled = false;
+		
+		if (!_enabled) {
+			tf.Enabled = false;
+		}
+		
 		tf.OnChange(() => _onChange?.Invoke(this, new ChangeEvent { Text = tf.StringValue }));
 
 		window.Append(tf);

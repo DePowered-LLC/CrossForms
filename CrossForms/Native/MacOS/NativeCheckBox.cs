@@ -17,7 +17,7 @@ public class NativeCheckBox: ICheckBox, INativeAttachable, INativeFocusable {
 		get => nsCheckBox?.State ?? _checked;
 		set {
 			_checked = value;
-			if (nsCheckBox != null) nsCheckBox.State = value;
+			nsCheckBox?.State = value;
 		}
 	}
 
@@ -25,7 +25,7 @@ public class NativeCheckBox: ICheckBox, INativeAttachable, INativeFocusable {
 		get => nsCheckBox?.Enabled ?? _enabled;
 		set {
 			_enabled = value;
-			if (nsCheckBox != null) nsCheckBox.Enabled = value;
+			nsCheckBox?.Enabled = value;
 		}
 	}
 
@@ -42,17 +42,22 @@ public class NativeCheckBox: ICheckBox, INativeAttachable, INativeFocusable {
 	public NsView? FocusView => nsCheckBox;
 
 	public void AttachTo (NsWindow window) {
-		var cb = new NsCheckBox(Text);
-		nsCheckBox = cb;
-		cb.State = _checked;
-		if (!_enabled) cb.Enabled = false;
+		var nsBoxText = NsString.CloneOwned(Text);
+		var box = NsCheckBox.CreateAuto(nsBoxText, NsApplication.Current.AppDelegate.RefNoOp);
+		nsBoxText.Release();
+		nsCheckBox = box;
 		
-		cb.OnClick(() => {
-			_checked = cb.State;
+		box.State = _checked;
+		if (!_enabled) {
+			box.Enabled = false;
+		}
+		
+		box.OnClick(() => {
+			_checked = box.State;
 			_onChange?.Invoke(this, new CheckEvent { Checked = _checked });
 		});
 
-		window.Append(cb);
-		cb.ApplyConstraints(window, X, Y, Width, Height);
+		window.Append(box);
+		box.ApplyConstraints(window, X, Y, Width, Height);
 	}
 }

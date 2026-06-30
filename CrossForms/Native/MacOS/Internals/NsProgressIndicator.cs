@@ -1,11 +1,9 @@
-using System.Runtime.InteropServices;
-
 namespace CrossForms.Native.MacOS.Internals;
 
 
-public partial class NsProgressIndicator: NsView {
-	private static readonly ObjClass Proto = ObjClass.Get("NSProgressIndicator");
-	private static readonly IntPtr AllocSel = ObjSelector.Get("alloc");
+public class NsProgressIndicator: NsView, IObjClass<NsProgressIndicator> {
+	public new static readonly ObjClass<NsProgressIndicator> Proto = ObjClass<NsProgressIndicator>.Get("NSProgressIndicator");
+	
 	private static readonly IntPtr InitSel = ObjSelector.Get("init");
 	private static readonly IntPtr SetMinSel = ObjSelector.Get("setMinValue:");
 	private static readonly IntPtr SetMaxSel = ObjSelector.Get("setMaxValue:");
@@ -15,23 +13,28 @@ public partial class NsProgressIndicator: NsView {
 	private static readonly IntPtr StartAnimSel = ObjSelector.Get("startAnimation:");
 	private static readonly IntPtr StopAnimSel = ObjSelector.Get("stopAnimation:");
 
-	public NsProgressIndicator () {
-		var alloc = ObjC.SendMessage(Proto.inner, AllocSel);
-		inner = ObjC.SendMessage(alloc, InitSel);
-		TranslatesAutoresizingMaskIntoConstraints = false;
+	public static NsProgressIndicator CreateOwned () {
+		var result = Proto.Allocate();
+		result.inner = ObjC.SendMessage(result.inner, InitSel);
+		
+		result.TranslatesAutoresizingMaskIntoConstraints = false;
+		return result;
 	}
+	
+	public new static NsProgressIndicator Borrow (IntPtr ptr) => new(ptr);
+	protected NsProgressIndicator (IntPtr ptr): base(ptr) {}
 
 	public double MinValue {
-		set => SendDouble(inner, SetMinSel, value);
+		set => ObjC.SetDouble(inner, SetMinSel, value);
 	}
 
 	public double MaxValue {
-		set => SendDouble(inner, SetMaxSel, value);
+		set => ObjC.SetDouble(inner, SetMaxSel, value);
 	}
 
 	public double Value {
-		get => GetDouble(inner, GetValueSel);
-		set => SendDouble(inner, SetValueSel, value);
+		get => ObjC.SendMessage<double>(inner, GetValueSel);
+		set => ObjC.SetDouble(inner, SetValueSel, value);
 	}
 
 	public bool Indeterminate {
@@ -40,11 +43,4 @@ public partial class NsProgressIndicator: NsView {
 			ObjC.SendMessage(inner, value ? StartAnimSel : StopAnimSel, IntPtr.Zero);
 		}
 	}
-
-	// arm64: objc_msgSend handles all types, so no _fpret variant needed
-	[LibraryImport(ObjC.CocoaPath, EntryPoint = "objc_msgSend")]
-	private static partial void SendDouble (IntPtr obj, IntPtr sel, double value);
-
-	[LibraryImport(ObjC.CocoaPath, EntryPoint = "objc_msgSend")]
-	private static partial double GetDouble (IntPtr obj, IntPtr sel);
 }

@@ -73,14 +73,18 @@ public class NativeSelect<T>: NativeSelectBase {
 	private void ReloadItems () {
 		nsPopUpButton!.RemoveAllItems();
 		foreach (var item in _typedItems) {
-			nsPopUpButton.AddItem(_label(item));
+			var nsItemStr = NsString.CloneOwned(_label(item));
+			nsPopUpButton.AddItem(nsItemStr);
+			nsItemStr.Release();
 		}
 	}
 
 	internal override NsPopUpButton CreateNsPopUpButton () {
-		var pb = new NsPopUpButton();
+		var pb = NsPopUpButton.CreateOwned();
 		foreach (var item in _typedItems) {
-			pb.AddItem(_label(item));
+			var nsItemStr = NsString.CloneOwned(_label(item));
+			pb.AddItem(nsItemStr);
+			nsItemStr.Release();
 		}
 		
 		pb.SelectedIndex = selectedIndex;
@@ -96,3 +100,5 @@ public class NativeSelect<T>: NativeSelectBase {
 		return pb;
 	}
 }
+
+// todo: check that all *Auto retained if necessary and all *Owned is released

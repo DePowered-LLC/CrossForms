@@ -4,14 +4,11 @@ namespace CrossForms.Native.Stub;
 
 
 public class NativePictureBox: IPictureBox {
-	public string ImagePath {
-		get => throw new NotImplementedException();
-		set => throw new NotImplementedException();
+	public void LoadImage (string path) {
+		throw new NotImplementedException();
 	}
-
-	public byte[]? ImageData {
-		get => throw new NotImplementedException();
-		set => throw new NotImplementedException();
+	public void LoadImage (byte[] data) {
+		throw new NotImplementedException();
 	}
 
 	public int X {

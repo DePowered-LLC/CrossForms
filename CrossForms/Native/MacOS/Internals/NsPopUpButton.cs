@@ -1,9 +1,9 @@
 namespace CrossForms.Native.MacOS.Internals;
 
 
-public class NsPopUpButton: NsControl {
-	private static readonly ObjClass Proto = ObjClass.Get("NSPopUpButton");
-	private static readonly IntPtr AllocSel = ObjSelector.Get("alloc");
+public class NsPopUpButton: NsControl, IObjClass<NsPopUpButton> {
+	public new static readonly ObjClass<NsPopUpButton> Proto = ObjClass<NsPopUpButton>.Get("NSPopUpButton");
+	
 	private static readonly IntPtr InitSel = ObjSelector.Get("init");
 	private static readonly IntPtr AddItemSel = ObjSelector.Get("addItemWithTitle:");
 	private static readonly IntPtr RemoveAllItemsSel = ObjSelector.Get("removeAllItems");
@@ -12,17 +12,24 @@ public class NsPopUpButton: NsControl {
 	private static readonly IntPtr SetTargetSel = ObjSelector.Get("setTarget:");
 	private static readonly IntPtr SetActionSel = ObjSelector.Get("setAction:");
 
-	public NsPopUpButton () {
-		var alloc = ObjC.SendMessage(Proto.inner, AllocSel);
-		inner = ObjC.SendMessage(alloc, InitSel);
-		TranslatesAutoresizingMaskIntoConstraints = false;
+	public static NsPopUpButton CreateOwned () {
+		var result = Proto.Allocate();
+		result.inner = ObjC.SendMessage(result.inner, InitSel);
+		
+		result.TranslatesAutoresizingMaskIntoConstraints = false;
+		return result;
 	}
 
-	public void AddItem (string title) =>
-		ObjC.SendMessage(inner, AddItemSel, new NsString(title).inner);
+	public new static NsPopUpButton Borrow (IntPtr ptr) => new(ptr);
+	protected NsPopUpButton (IntPtr ptr): base(ptr) {}
 
-	public void RemoveAllItems () =>
+	public void AddItem (NsString title) {
+		ObjC.SendMessage(inner, AddItemSel, title.inner);
+	}
+
+	public void RemoveAllItems () {
 		ObjC.SendMessage(inner, RemoveAllItemsSel);
+	}
 
 	public int SelectedIndex {
 		get => (int) ObjC.SendMessage(inner, IndexOfSelectedSel);

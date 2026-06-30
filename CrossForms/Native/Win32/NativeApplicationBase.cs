@@ -49,6 +49,10 @@ public class NativeApplicationBase: ApplicationBase {
 		return true;
 	}
 
+	public new static void Quit () {
+		PostQuitMessage(0);
+	}
+
 	public new static void Dispose () {
 		ShutdownGdiplus();
 		DeactivateActCtx(0, _actCtx);

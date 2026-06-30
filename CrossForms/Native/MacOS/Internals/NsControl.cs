@@ -1,9 +1,12 @@
 namespace CrossForms.Native.MacOS.Internals;
 
 
-public class NsControl: NsView {
+public class NsControl: NsView, IObjClass<NsControl> {
 	private static readonly IntPtr GetEnabledSel = ObjSelector.Get("isEnabled");
 	private static readonly IntPtr SetEnabledSel = ObjSelector.Get("setEnabled:");
+	
+	public new static NsControl Borrow (IntPtr ptr) => new(ptr);
+	protected NsControl (IntPtr ptr): base(ptr) {}
 
 	public bool Enabled {
 		get => ObjC.SendMessage(inner, GetEnabledSel) != IntPtr.Zero;

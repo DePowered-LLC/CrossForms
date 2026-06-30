@@ -11,28 +11,34 @@ public struct EventHandlers {
 	public IntPtr selector;
 }
 
-public class NsEventDispatcher: NsNested {
+public class NsEventDispatcher: NsNested, IObjClass<NsEventDispatcher> {
 	public delegate void DispatchEventFn (IntPtr self, IntPtr sel, IntPtr source);
 
 	public IntPtr dispatcherInstance;
 
 	protected Dictionary<string, EventHandlers> events = new();
 
-	internal ObjClass DispatcherClass {
+	private static int _classSeq;
+
+	public new static NsEventDispatcher Borrow (IntPtr ptr) => new(ptr);
+	protected NsEventDispatcher (IntPtr ptr): base(ptr) {}
+
+	public ObjClass<NsEventDispatcher> DispatcherClass {
 		get {
 			if (field != null) {
 				return field;
 			}
 
-			field = NsObject.Proto.NewSubClass(GetType().Name + "_ED");
-			dispatcherInstance = ObjC.SendMessage(field.inner, "alloc");
+			var seq = Interlocked.Increment(ref _classSeq);
+			field = NsObject.Proto.NewSubClass<NsEventDispatcher>(GetType().Name + "_ED_" + seq);
+			dispatcherInstance = ObjC.SendMessage(ObjC.SendMessage(field.inner, "alloc"), "init");
 			return field;
 		}
 	}
 
 	public IntPtr AttachEvent (NativeManaged<IntPtr> source, string name, Action handler) {
 		if (events.TryGetValue(name, out var handlers)) {
-			handlers.map.Add(source.inner, handler);
+			handlers.map[source.inner] = handler;
 			return handlers.selector;
 		}
 
@@ -51,10 +57,8 @@ public class NsEventDispatcher: NsNested {
 	public void DispatchEvent (IntPtr self, IntPtr selector, IntPtr source) {
 		var name = Marshal.PtrToStringAnsi(ObjSelector.GetName(selector));
 		if (name == null) return;
-
-		var isNotification = NsNotification.Proto.IsInstance(source);
-		if (isNotification) {
-			var notification = new NsNotification { inner = source };
+		
+		if (NsNotification.Proto.TryCast(source, out var notification)) {
 			source = notification.Object;
 		}
 

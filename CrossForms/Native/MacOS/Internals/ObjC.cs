@@ -1,5 +1,7 @@
 using System.Runtime.InteropServices;
 
+using CrossForms.Native.Common;
+
 namespace CrossForms.Native.MacOS.Internals;
 
 
@@ -49,6 +51,41 @@ internal static partial class ObjC {
 		IntPtr cls, IntPtr selector, IntPtr arg1, int arg2, int arg3, IntPtr arg4,
 		int arg5, float arg6, float arg7
 	);
+
+	[LibraryImport(CocoaPath, EntryPoint = "objc_msgSend")]
+	public static partial IntPtr SendMessage (
+		IntPtr cls, IntPtr selector, IntPtr arg1, IntPtr arg2, IntPtr arg3, IntPtr arg4
+	);
+	
+	[LibraryImport(CocoaPath, EntryPoint = "objc_msgSend")]
+	public static partial IntPtr SendMessage (
+		IntPtr cls, IntPtr selector, CgRect arg1, long arg2, long arg3, IntPtr arg4
+	);
+	
+	[LibraryImport(CocoaPath, EntryPoint = "objc_msgSend")]
+	public static partial IntPtr SendMessage (IntPtr cls, IntPtr selector, IntPtr arg1, IntPtr arg2, IntPtr arg3);
+	
+	[LibraryImport(CocoaPath, EntryPoint = "objc_msgSend")]
+	public static partial IntPtr SendMessage (IntPtr cls, IntPtr selector, CgPoint point);
+	
+	[LibraryImport(CocoaPath, EntryPoint = "objc_msgSend")]
+	public static partial IntPtr SendMessage (IntPtr cls, IntPtr selector, CgSize size);
+	
+	[LibraryImport(ObjC.CocoaPath, EntryPoint = "objc_msgSend")]
+	public static partial IntPtr SendMessage (
+		IntPtr cls, IntPtr selector, CgRect frame, long styleMask, long backing,
+		int defer
+	);
+
+	[LibraryImport(CocoaPath, EntryPoint = "objc_msgSend")]
+	public static partial void SetDouble (IntPtr obj, IntPtr sel, double value);
+
+	[LibraryImport(CocoaPath, EntryPoint = "objc_msgSend")]
+	public static partial double GetDouble (IntPtr obj, IntPtr sel);
+
+	
+	[LibraryImport(CocoaPath, EntryPoint = "CFRelease")]
+	public static partial void ReleaseNsObject (IntPtr ptr);
 
 	public static IntPtr SendMessage (IntPtr receiver, string selector) {
 		return SendMessage(receiver, ObjSelector.Get(selector));

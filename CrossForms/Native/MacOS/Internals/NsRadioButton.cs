@@ -3,19 +3,31 @@ using System.Runtime.InteropServices;
 namespace CrossForms.Native.MacOS.Internals;
 
 
-public partial class NsRadioButton: NsControl {
-	private static readonly ObjClass Proto = ObjClass.Get("NSButton");
+public class NsRadioButton: NsControl, IObjClass<NsRadioButton> {
+	public new static readonly ObjClass<NsRadioButton> Proto = ObjClass<NsRadioButton>.Get("NSButton");
+	
 	private static readonly IntPtr RadioWithTitleSel = ObjSelector.Get("radioButtonWithTitle:target:action:");
 	private static readonly IntPtr SetTargetSel = ObjSelector.Get("setTarget:");
 	private static readonly IntPtr SetActionSel = ObjSelector.Get("setAction:");
 	private static readonly IntPtr GetStateSel = ObjSelector.Get("state");
 	private static readonly IntPtr SetStateSel = ObjSelector.Get("setState:");
-
-	public NsRadioButton (string title) {
-		inner = SendMessage(Proto.inner, RadioWithTitleSel, new NsString(title).inner,
-			NsApplication.Current.AppDelegate.inner, AppDelegate.NO_OP);
-		TranslatesAutoresizingMaskIntoConstraints = false;
+	
+	public static NsRadioButton CreateAuto (NsString title, MethodRef handler) {
+		var inner = ObjC.SendMessage(
+			Proto.inner,
+			RadioWithTitleSel,
+			title.inner,
+			handler.DelegatePtr,
+			handler.MethodPtr
+		);
+		
+		return new NsRadioButton(inner) {
+			TranslatesAutoresizingMaskIntoConstraints = false
+		};
 	}
+
+	public new static NsRadioButton Borrow (IntPtr ptr) => new(ptr);
+	protected NsRadioButton (IntPtr ptr): base(ptr) {}
 
 	public bool State {
 		get => ObjC.SendMessage(inner, GetStateSel) != IntPtr.Zero;
@@ -28,9 +40,4 @@ public partial class NsRadioButton: NsControl {
 			ObjC.SendMessage(inner, SetActionSel, selector);
 		});
 	}
-
-	[LibraryImport(ObjC.CocoaPath, EntryPoint = "objc_msgSend")]
-	private static partial IntPtr SendMessage (
-		IntPtr cls, IntPtr selector, IntPtr title, IntPtr target, IntPtr action
-	);
 }

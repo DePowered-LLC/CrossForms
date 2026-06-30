@@ -40,15 +40,21 @@ public class NativeButton: IButton, INativeAttachable, INativeFocusable {
 	}
 
 	public void AttachTo (NsWindow window) {
-		var btn = new NsButton(Text);
+		var nsBtnText = NsString.CloneOwned(Text);
+		var btn = NsButton.CreateAuto(nsBtnText, NsApplication.Current.AppDelegate.RefNoOp);
+		nsBtnText.Release();
 		nsButton = btn;
-		if (!_enabled) btn.Enabled = false;
+		
+		if (!_enabled) {
+			btn.Enabled = false;
+		}
+		
 		btn.OnClick(() => {
 			var clickPos = new ClickEvent();
-			var ev = NsApplication.Current.CurrentEvent;
+			var ev = NsApplication.Current.BorrowCurrentEvent();
 			if (ev != null) {
 				var loc = ev.LocationInWindow;
-				var frame = btn.Window?.ContentView.Frame;
+				var frame = btn.BorrowWindow()?.BorrowContentView().Frame;
 				if (frame.HasValue) {
 					clickPos.x = (int) loc.x;
 					clickPos.y = (int) (frame.Value.size.height - loc.y);

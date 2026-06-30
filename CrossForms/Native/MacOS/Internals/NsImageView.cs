@@ -1,46 +1,32 @@
-using System.Runtime.InteropServices;
-
 namespace CrossForms.Native.MacOS.Internals;
 
 
-public class NsImageView: NsView {
-	private static readonly ObjClass Proto = ObjClass.Get("NSImageView");
-	private static readonly ObjClass ImageProto = ObjClass.Get("NSImage");
-	private static readonly ObjClass DataProto = ObjClass.Get("NSData");
-	private static readonly IntPtr AllocSel = ObjSelector.Get("alloc");
+public class NsImageView: NsView, IObjClass<NsImageView> {
+	private new static readonly ObjClass<NsImageView> Proto = ObjClass<NsImageView>.Get("NSImageView");
+	
 	private static readonly IntPtr InitSel = ObjSelector.Get("init");
-	private static readonly IntPtr InitWithFileSel = ObjSelector.Get("initWithContentsOfFile:");
-	private static readonly IntPtr InitWithDataSel = ObjSelector.Get("initWithData:");
-	private static readonly IntPtr DataWithBytesSel = ObjSelector.Get("dataWithBytes:length:");
+	private static readonly IntPtr GetImageSel = ObjSelector.Get("image");
 	private static readonly IntPtr SetImageSel = ObjSelector.Get("setImage:");
 	private static readonly IntPtr SetScalingSel = ObjSelector.Get("setImageScaling:");
 
-	public NsImageView () {
-		var alloc = ObjC.SendMessage(Proto.inner, AllocSel);
-		inner = ObjC.SendMessage(alloc, InitSel);
-		TranslatesAutoresizingMaskIntoConstraints = false;
-		ObjC.SendMessage(inner, SetScalingSel, 3); // NSImageScaleProportionallyUpOrDown
+	public static NsImageView CreateOwned () {
+		var view = Proto.Allocate();
+		view.inner = ObjC.SendMessage(view.inner, InitSel);
+		
+		view.TranslatesAutoresizingMaskIntoConstraints = false;
+		// todo: enum, property
+		ObjC.SendMessage(view.inner, SetScalingSel, 3); // NSImageScaleProportionallyUpOrDown
+		return view;
 	}
 
-	public string ImagePath {
-		set {
-			var alloc = ObjC.SendMessage(ImageProto.inner, AllocSel);
-			var nsImg = ObjC.SendMessage(alloc, InitWithFileSel, new NsString(value).inner);
-			ObjC.SendMessage(inner, SetImageSel, nsImg);
-		}
-	}
+	public new static NsImageView Borrow (IntPtr ptr) => new(ptr);
+	protected NsImageView (IntPtr ptr): base(ptr) {}
 
-	public byte[] ImageData {
-		set {
-			var pin = GCHandle.Alloc(value, GCHandleType.Pinned);
-			try {
-				var nsData = ObjC.SendMessage(DataProto.inner, DataWithBytesSel, pin.AddrOfPinnedObject(), value.Length);
-				var alloc = ObjC.SendMessage(ImageProto.inner, AllocSel);
-				var nsImg = ObjC.SendMessage(alloc, InitWithDataSel, nsData);
-				ObjC.SendMessage(inner, SetImageSel, nsImg);
-			} finally {
-				pin.Free();
-			}
+	public NsImage? Image {
+		get {
+			var ptr = ObjC.SendMessage(inner, GetImageSel);
+			return ptr == IntPtr.Zero ? null : NsImage.Borrow(ptr);
 		}
+		set => ObjC.SendMessage(inner, SetImageSel, value?.inner ?? IntPtr.Zero);
 	}
 }

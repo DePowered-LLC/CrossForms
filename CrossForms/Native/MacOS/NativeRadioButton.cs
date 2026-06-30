@@ -37,23 +37,29 @@ public class NativeRadioButton: IRadioButton, INativeAttachable, INativeFocusabl
 	public NsView? FocusView => nsRadioButton;
 
 	public void AttachTo (NsWindow window) {
-		var rb = new NsRadioButton(Text) { State = _checked };
-		nsRadioButton = rb;
-		if (!_enabled) rb.Enabled = false;
+		var nsBtnText = NsString.CloneOwned(Text);
+		var btn = NsRadioButton.CreateAuto(nsBtnText, NsApplication.Current.AppDelegate.RefNoOp);
+		btn.State = _checked;
+		nsBtnText.Release();
+		nsRadioButton = btn;
+		
+		if (!_enabled) {
+			btn.Enabled = false;
+		}
 
 		if (group != null) {
 			var index = Array.IndexOf(group.Items, this);
-			rb.OnClick(() => {
+			btn.OnClick(() => {
 				foreach (var item in group.Items) {
 					((NativeRadioButton) item).nsRadioButton!.State = false;
 				}
 
-				rb.State = true;
+				btn.State = true;
 				group.NotifyChange(index);
 			});
 		}
 
-		window.Append(rb);
-		rb.ApplyConstraints(window, X, Y, Width, Height);
+		window.Append(btn);
+		btn.ApplyConstraints(window, X, Y, Width, Height);
 	}
 }

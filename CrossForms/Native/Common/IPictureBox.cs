@@ -2,8 +2,9 @@ namespace CrossForms.Native.Common;
 
 
 public interface IPictureBox {
-	string ImagePath { get; set; }
-	byte[]? ImageData { get; set; }
+	void LoadImage (string path);
+	void LoadImage (byte[] data);
+	
 	int X { get; set; }
 	int Y { get; set; }
 	ushort Width { get; set; }

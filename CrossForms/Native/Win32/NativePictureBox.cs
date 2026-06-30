@@ -10,24 +10,18 @@ public class NativePictureBox: Control, IPictureBox {
 	private string _imagePath = "";
 	private byte[]? _imageData;
 	private IntPtr _hBitmap = IntPtr.Zero;
-
-	public string ImagePath {
-		get => _imagePath;
-		set {
-			_imagePath = value;
-			_imageData = null;
-			if (IsLoaded) ApplyImage();
-		}
+	
+	public void LoadImage (string path) {
+		_imagePath = path;
+		_imageData = null;
+		if (IsLoaded) ApplyImage();
 	}
-
-	public byte[]? ImageData {
-		get => _imageData;
-		set {
-			_imageData = value;
-			if (value != null) {
-				_imagePath = "";
-				if (IsLoaded) ApplyImageData(value);
-			}
+	
+	public void LoadImage (byte[]? data) {
+		_imageData = data;
+		if (data != null) {
+			_imagePath = "";
+			if (IsLoaded) ApplyImageData(data);
 		}
 	}
 
@@ -43,7 +37,14 @@ public class NativePictureBox: Control, IPictureBox {
 	}
 
 	private void ApplyImage () {
-		var hNew = LoadImage(IntPtr.Zero, _imagePath, (uint) ImageType.Bitmap, Width, Height, 0x0010 /* LR_LOADFROMFILE */);
+		var hNew = Internals.Internals.LoadImage(
+			IntPtr.Zero,
+			_imagePath,
+			(uint) ImageType.Bitmap,
+			Width,
+			Height,
+			0x0010 /* LR_LOADFROMFILE */
+		);
 		SetBitmap(hNew);
 	}
 

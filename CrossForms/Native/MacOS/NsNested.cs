@@ -1,8 +1,10 @@
-using CrossForms.Native.Common;
+using CrossForms.Native.MacOS.Internals;
 
 namespace CrossForms.Native.MacOS;
 
 
-public class NsNested: NativeManaged<IntPtr> {
+public class NsNested: NsObject {
 	public NsNested? parent;
+	
+	protected NsNested (IntPtr ptr): base(ptr) {}
 }

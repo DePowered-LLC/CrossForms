@@ -10,6 +10,7 @@ internal partial class Internals {
 	public const uint WmClose = 0x0010;
 	public const uint WmCommand = 0x0111;
 	public const uint WmQuit = 0x0012;
+	public const uint WmLButtonDown = 0x0201;
 	public const uint WmLButtonUp = 0x0202;
 	public const uint WmUser = 0x0400;
 	public const uint WmTray = WmUser + 1;
@@ -126,6 +127,17 @@ internal partial class Internals {
 	[return: MarshalAs(UnmanagedType.Bool)]
 	public static partial bool InvalidateRect (IntPtr hWnd, IntPtr lpRect, [MarshalAs(UnmanagedType.Bool)] bool bErase);
 
+	[LibraryImport("user32.dll", EntryPoint = "LoadCursorW")]
+	public static partial IntPtr LoadCursor (IntPtr hInstance, IntPtr lpCursorName);
+
+	[LibraryImport("user32.dll")]
+	public static partial int GetSystemMetrics (int nIndex);
+
+	public const int SmCxScreen = 0;
+	public const int SmCyScreen = 1;
+
+	public static readonly IntPtr IdcArrow = (IntPtr) 32512;
+
 	public static unsafe string GetWindowText (IntPtr hWnd) {
 		var buf = stackalloc char[256];
 		GetWindowTextRaw(hWnd, buf, 256);
@@ -152,6 +164,7 @@ internal partial class Internals {
 				cbSize = (uint) Marshal.SizeOf<WindowClassEx>(),
 				lpfnWndProc = onMessage,
 				hInstance = GetModuleHandle(),
+				hCursor = LoadCursor(IntPtr.Zero, IdcArrow),
 				lpszClassName = className,
 				hbrBackground = (IntPtr) (5 + 1) // COLOR_WINDOW + 1
 			};

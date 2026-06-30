@@ -5,28 +5,24 @@ namespace CrossForms.Native.MacOS;
 
 
 public class NativePictureBox: IPictureBox, INativeAttachable {
-	internal NsImageView? nsImageView;
-	private string _imagePath = "";
-	private byte[]? _imageData;
+	private readonly NsImageView _nsImageView = NsImageView.CreateOwned();
 
-	public string ImagePath {
-		get => _imagePath;
-		set {
-			_imagePath = value;
-			_imageData = null;
-			nsImageView?.ImagePath = value;
-		}
+	public void LoadImage (string path) {
+		var nsPath = NsString.CloneOwned(path);
+		var nsImg = NsImage.CreateOwned(nsPath);
+		nsPath.Release();
+		EmplaceImage(nsImg);
+		nsImg.Release();
 	}
 
-	public byte[]? ImageData {
-		get => _imageData;
-		set {
-			_imageData = value;
-			if (value != null) {
-				_imagePath = "";
-				nsImageView?.ImageData = value;
-			}
-		}
+	public void LoadImage (byte[] data) {
+		var nsImg = NsImage.CreateOwned(NsData.CreateAuto(data));
+		EmplaceImage(nsImg);
+		nsImg.Release();
+	}
+
+	private void EmplaceImage (NsImage image) {
+		_nsImageView.Image = image;
 	}
 
 	public int X { get; set; }
@@ -35,12 +31,7 @@ public class NativePictureBox: IPictureBox, INativeAttachable {
 	public ushort Height { get; set; } = 100;
 
 	public void AttachTo (NsWindow window) {
-		var iv = new NsImageView();
-		nsImageView = iv;
-		if (_imageData != null) iv.ImageData = _imageData;
-		else if (_imagePath != "") iv.ImagePath = _imagePath;
-
-		window.ContentView.AddSubview(iv);
-		iv.ApplyConstraints(window, X, Y, Width, Height);
+		window.BorrowContentView().AddSubview(_nsImageView);
+		_nsImageView.ApplyConstraints(window, X, Y, Width, Height);
 	}
 }
